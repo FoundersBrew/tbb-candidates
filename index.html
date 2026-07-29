@@ -6,6 +6,7 @@
 <title>Building Blocks — Outreach Dispatch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --ink:#14161F;
@@ -188,6 +189,33 @@
 
   .empty-col{color:var(--text-faint);font-size:12px;text-align:center;padding:20px 4px;}
 
+  /* ---------- Stale review panel ---------- */
+  .stale-card{
+    background:var(--surface);border:1px solid rgba(190,106,80,0.32);border-radius:14px;
+    padding:18px 20px 16px;margin-bottom:22px;
+  }
+  .stale-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .stale-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .stale-count{background:var(--clay-dim);color:var(--clay);border-radius:10px;padding:1px 9px;font-size:12px;font-family:'IBM Plex Mono',monospace;}
+  .stale-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .stale-instructions{
+    font-size:12px;color:var(--text-faint);margin:10px 0 14px;line-height:1.55;
+    padding-bottom:12px;border-bottom:1px solid var(--hair-soft);
+  }
+  .stale-instructions b{color:var(--text-dim);}
+  .stale-rows{display:flex;flex-direction:column;gap:8px;}
+  .stale-row{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;padding:9px 12px;
+  }
+  .stale-name{font-size:13px;font-weight:600;color:var(--text);}
+  .stale-name .stale-company{font-weight:400;color:var(--text-dim);}
+  .stale-meta{font-size:10.5px;color:var(--text-faint);margin-top:2px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.03em;}
+  .stale-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .mini-btn.accent-clay{background:var(--clay-dim);color:var(--clay);border-color:rgba(190,106,80,0.4);}
+  .mini-btn.accent-clay:hover{background:var(--clay);color:#1c0f0a;}
+  .stale-empty{font-size:12.5px;color:var(--text-faint);padding:4px 2px 0;}
+
   /* ---------- Modal ---------- */
   .modal-bg{
     position:fixed;inset:0;background:rgba(10,11,17,0.7);backdrop-filter:blur(2px);
@@ -252,7 +280,7 @@
     { key:'invalid_linkedin', label:'Invalid LinkedIn' }
   ];
   var FUNNEL_KEYS = ['requested','accepted','responded','interested','booked'];
-  var STORAGE_KEY = 'building-blocks-outreach-pipeline-v1';
+  var STORAGE_KEY = 'building-blocks-outreach-pipeline-v2-restored';
 
   var people = [];
   var filters = { source:'all', region:'all', q:'' };
@@ -291,94 +319,122 @@
   }
 
   function seedData(){
+    // [name, company, region, linkedin, status, source, notes]
     var raw = [
-      ["Adi Singh","AgentMail","San Francisco","https://linkedin.com/in/adivirsingh13"],
-      ["Ahmed AJ","Tasker AI","San Francisco","https://www.linkedin.com/in/ahmedajsf/"],
-      ["Ai Daniil Bekirov","Sparkles","San Francisco","https://www.linkedin.com/in/aidaniilbekirov/"],
-      ["Akash Thakur","ProcIndex","San Francisco","https://www.linkedin.com/in/akashthakur1203"],
-      ["Akshay Budhkar","Spine AI","San Francisco","https://linkedin.com/in/akshay-budhkar-06259041"],
-      ["Akshay Narisetti","Pocket","San Francisco","https://www.linkedin.com/in/akshaynarisetti"],
-      ["Ali Sareini","Nautilus","San Francisco","https://www.linkedin.com/in/alisareini/"],
-      ["Amayr Babar","Nautilus","San Francisco","https://linkedin.com/in/amayrbabar"],
-      ["Angelo (KC) Huang","Swif.ai","San Francisco","https://www.linkedin.com/in/angelokh"],
-      ["Aoi Otani","Liva AI","San Francisco","https://linkedin.com/in/aoi-otani-ab3a1b205"],
-      ["Artur Romanov","Trace","International","https://linkedin.com/in/artur-romanov"],
-      ["Ashley Mo","Liva AI","San Francisco","https://www.linkedin.com/in/ashley-mo/"],
-      ["Ashwin Venkatesh Raman","Spine AI","San Francisco","https://linkedin.com/in/avraman"],
-      ["Avi Konduru","Shor","San Francisco","https://linkedin.com/in/kumaravinash-avi-konduru-54b3a6bb"],
-      ["Brandon Yao","Semiotic","San Francisco","https://www.linkedin.com/in/brandonyao/"],
-      ["Bruno Koba","Astor","San Francisco","https://www.linkedin.com/in/bruno-koba/"],
-      ["Bryan Grisales","Semiotic","San Francisco","https://www.linkedin.com/in/bryan-grisales/"],
-      ["Caleb Chan","Lance","San Francisco","https://www.linkedin.com/in/caleb-chan-327b14239/"],
-      ["Can Zehebi","Zavo","International","https://www.linkedin.com/in/canzehebi/"],
-      ["Chris Minge","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/chrisminge"],
-      ["Daivik Goel","Shor","San Francisco","https://linkedin.com/in/daivikg"],
-      ["Daniel Tulha Hochstetler","Astor","San Francisco","https://www.linkedin.com/in/daniel-hochstetler"],
-      ["Don Muir","F2","US (outside SF)","https://www.linkedin.com/in/don-muir"],
-      ["Dwarak Govind Parthiban","s2.dev","San Francisco","https://www.linkedin.com/in/dwarakgovindparthiban/"],
-      ["Evan Seeyave","TwentyTwo","US (outside SF)","https://www.linkedin.com/in/evanseeyave"],
-      ["Gabriel Dymowski","Pocket","San Francisco","https://www.linkedin.com/in/gabrieldymowski/"],
-      ["Gatik Trivedi","Lance","San Francisco","https://www.linkedin.com/in/gatik-trivedi"],
-      ["Gavin Brennen","Lance","San Francisco","https://www.linkedin.com/in/gavinbrennen/"],
-      ["Haakam Aujla","AgentMail","San Francisco","https://www.linkedin.com/in/haaaujla/"],
-      ["Ilkan Gezer","Zavo","International","https://www.linkedin.com/in/ilkan-gezer-4a16a6268"],
-      ["James Jiang","OpenBuilder","San Francisco","https://www.linkedin.com/in/jamesdreamcrafters/"],
-      ["Jess Lee","Sequoia Capital","San Francisco","https://www.linkedin.com/in/jesskah/"],
-      ["Julius Körfgen","Uplane","San Francisco","https://www.linkedin.com/in/julius-koerfgen/"],
-      ["Kevin Cox","Adaptional","San Francisco","https://www.linkedin.com/in/kevin-cox-90337b47/"],
-      ["Luigi Pederzani","Manufact","San Francisco","https://www.linkedin.com/in/luigipederzani"],
-      ["Lukas Vollmer","Uplane","San Francisco","https://www.linkedin.com/in/lukasvollmer/"],
-      ["Marvin Abdel-Massih","Uplane","San Francisco","https://www.linkedin.com/in/marvinabdel-massih/"],
-      ["Michael Chen","Yondu","US (outside SF)","https://linkedin.com/in/michael-chen-17464a1b1"],
-      ["Michael Kim","AgentMail","San Francisco","https://www.linkedin.com/in/hyun-michael-kim-281242220/"],
-      ["Michael Roberson","Semiotic","San Francisco","https://www.linkedin.com/in/michael-h-roberson/"],
-      ["Neha Suresh","ProcIndex","San Francisco","https://linkedin.com/in/nehasuresh1904"],
-      ["Pablo Hansen","Proliferate","San Francisco","https://linkedin.com/in/pablo-hansen"],
-      ["Paul Li","OpenBuilder","San Francisco","https://www.linkedin.com/in/hey-paul/"],
-      ["Pietro Zullo","Manufact","San Francisco","https://linkedin.com/in/pietrozullo"],
-      ["Raj Patel","Human Archive","San Francisco","https://www.linkedin.com/in/raj-patel2004/"],
-      ["Robin Seitz","kater.ai","San Francisco","https://linkedin.com/in/robin-seitz-12029970"],
-      ["Rushil Agarwal","Human Archive","San Francisco","https://www.linkedin.com/in/rushilagarwal261205/"],
-      ["Samay Maini","Human Archive","San Francisco","https://www.linkedin.com/in/samaymaini/"],
-      ["Shikhar Bhushan","s2.dev","San Francisco","https://linkedin.com/in/shikhrr"],
-      ["Shloke Patel","Human Archive","San Francisco","https://www.linkedin.com/in/shloke-patel/"],
-      ["Stephen Balogh","s2.dev","San Francisco","https://www.linkedin.com/in/stephen-balogh-078a4995/"],
-      ["Suril Kantaria","Adaptional","San Francisco","https://www.linkedin.com/in/suril-kantaria-59522922/"],
-      ["Tahmid Jamal","Yondu","US (outside SF)","https://linkedin.com/in/74hm1d"],
-      ["Tanner Jones","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/tanner-jones-817192167/"],
-      ["Tim Cherkasov","Trace","International","https://linkedin.com/in/timcherkasov"],
-      ["Vedant Singh","Salus","San Francisco","https://www.linkedin.com/in/thevedantsingh/"],
-      ["Yvonne Chou","kater.ai","San Francisco","https://linkedin.com/in/yvonne-chou"]
+      ["Yvonne Chou","kater.ai","San Francisco","https://linkedin.com/in/yvonne-chou","requested","Research",""],
+      ["Vedant Singh","Salus","San Francisco","https://www.linkedin.com/in/thevedantsingh/","requested","Research",""],
+      ["Tim Cherkasov","Trace","International","https://linkedin.com/in/timcherkasov","requested","Research",""],
+      ["Tanner Jones","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/tanner-jones-817192167/","requested","Research",""],
+      ["Tahmid Jamal","Yondu","US (outside SF)","https://linkedin.com/in/74hm1d","requested","Research",""],
+      ["Suril Kantaria","Adaptional","San Francisco","https://www.linkedin.com/in/suril-kantaria-59522922/","requested","Research",""],
+      ["Stephen Balogh","s2.dev","San Francisco","https://www.linkedin.com/in/stephen-balogh-078a4995/","requested","Research",""],
+      ["Shloke Patel","Human Archive","San Francisco","https://www.linkedin.com/in/shloke-patel/","requested","Research",""],
+      ["Shikhar Bhushan","s2.dev","San Francisco","https://linkedin.com/in/shikhrr","accepted","Research",""],
+      ["Samay Maini","Human Archive","San Francisco","https://www.linkedin.com/in/samaymaini/","requested","Research",""],
+      ["Rushil Agarwal","Human Archive","San Francisco","https://www.linkedin.com/in/rushilagarwal261205/","requested","Research",""],
+      ["Robin Seitz","kater.ai","San Francisco","https://linkedin.com/in/robin-seitz-12029970","requested","Research",""],
+      ["Raj Patel","Human Archive","San Francisco","https://www.linkedin.com/in/raj-patel2004/","requested","Research",""],
+      ["Pietro Zullo","Manufact","San Francisco","https://linkedin.com/in/pietrozullo","requested","Research",""],
+      ["Paul Li","OpenBuilder","San Francisco","https://www.linkedin.com/in/hey-paul/","requested","Research",""],
+      ["Pablo Hansen","Proliferate","San Francisco","https://linkedin.com/in/pablo-hansen","requested","Research",""],
+      ["Neha Suresh","ProcIndex","San Francisco","https://linkedin.com/in/nehasuresh1904","requested","Research",""],
+      ["Michael Roberson","Semiotic","San Francisco","https://www.linkedin.com/in/michael-h-roberson/","requested","Research",""],
+      ["Michael Kim","AgentMail","San Francisco","https://www.linkedin.com/in/hyun-michael-kim-281242220/","invalid_linkedin","Research",""],
+      ["Michael Chen","Yondu","US (outside SF)","https://linkedin.com/in/michael-chen-17464a1b1","requested","Research",""],
+      ["Marvin Abdel-Massih","Uplane","San Francisco","https://www.linkedin.com/in/marvinabdel-massih/","requested","Research",""],
+      ["Lukas Vollmer","Uplane","San Francisco","https://www.linkedin.com/in/lukasvollmer/","requested","Research",""],
+      ["Luigi Pederzani","Manufact","San Francisco","https://www.linkedin.com/in/luigipederzani","requested","Research",""],
+      ["Kevin Cox","Adaptional","San Francisco","https://www.linkedin.com/in/kevin-cox-90337b47/","requested","Research",""],
+      ["Julius Körfgen","Uplane","San Francisco","https://www.linkedin.com/in/julius-koerfgen/","requested","Research",""],
+      ["Jess Lee","Sequoia Capital","San Francisco","https://www.linkedin.com/in/jesskah/","requested","Research",""],
+      ["James Jiang","OpenBuilder","San Francisco","https://www.linkedin.com/in/jamesdreamcrafters/","requested","Research",""],
+      ["Ilkan Gezer","Zavo","International","https://www.linkedin.com/in/ilkan-gezer-4a16a6268","requested","Research",""],
+      ["Haakam Aujla","AgentMail","San Francisco","https://www.linkedin.com/in/haaaujla/","requested","Research",""],
+      ["Gavin Brennen","Lance","San Francisco","https://www.linkedin.com/in/gavinbrennen/","requested","Research",""],
+      ["Gatik Trivedi","Lance","San Francisco","https://www.linkedin.com/in/gatik-trivedi","requested","Research",""],
+      ["Gabriel Dymowski","Pocket","San Francisco","https://www.linkedin.com/in/gabrieldymowski/","requested","Research",""],
+      ["Evan Seeyave","TwentyTwo","US (outside SF)","https://www.linkedin.com/in/evanseeyave","requested","Research",""],
+      ["Dwarak Govind Parthiban","s2.dev","San Francisco","https://www.linkedin.com/in/dwarakgovindparthiban/","accepted","Research",""],
+      ["Don Muir","F2","US (outside SF)","https://www.linkedin.com/in/don-muir","requested","Research",""],
+      ["Daniel Tulha Hochstetler","Astor","San Francisco","https://www.linkedin.com/in/daniel-hochstetler","requested","Research",""],
+      ["Chris Minge","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/chrisminge","requested","Research",""],
+      ["Can Zehebi","Zavo","International","https://www.linkedin.com/in/canzehebi/","requested","Research",""],
+      ["Caleb Chan","Lance","San Francisco","https://www.linkedin.com/in/caleb-chan-327b14239/","requested","Research",""],
+      ["Bryan Grisales","Semiotic","San Francisco","https://www.linkedin.com/in/bryan-grisales/","requested","Research",""],
+      ["Bruno Koba","Astor","San Francisco","https://www.linkedin.com/in/bruno-koba/","requested","Research",""],
+      ["Brandon Yao","Semiotic","San Francisco","https://www.linkedin.com/in/brandonyao/","requested","Research",""],
+      ["Avi Konduru","Shor","San Francisco","https://linkedin.com/in/kumaravinash-avi-konduru-54b3a6bb","invalid_linkedin","Research","Flag: co-founder alongside Daivik Goel \u2014 confirm if internal"],
+      ["Ashwin Venkatesh Raman","Spine AI","San Francisco","https://linkedin.com/in/avraman","requested","Research",""],
+      ["Ashley Mo","Liva AI","San Francisco","https://www.linkedin.com/in/ashley-mo/","requested","Research",""],
+      ["Artur Romanov","Trace","International","https://linkedin.com/in/artur-romanov","requested","Research",""],
+      ["Aoi Otani","Liva AI","San Francisco","https://linkedin.com/in/aoi-otani-ab3a1b205","invalid_linkedin","Research",""],
+      ["Angelo (KC) Huang","Swif.ai","San Francisco","https://www.linkedin.com/in/angelokh","requested","Research",""],
+      ["Amayr Babar","Nautilus","San Francisco","https://linkedin.com/in/amayrbabar","requested","Research",""],
+      ["Ali Sareini","Nautilus","San Francisco","https://www.linkedin.com/in/alisareini/","requested","Research",""],
+      ["Akshay Narisetti","Pocket","San Francisco","https://www.linkedin.com/in/akshaynarisetti","requested","Research",""],
+      ["Akshay Budhkar","Spine AI","San Francisco","https://linkedin.com/in/akshay-budhkar-06259041","requested","Research",""],
+      ["Akash Thakur","ProcIndex","San Francisco","https://www.linkedin.com/in/akashthakur1203","requested","Research",""],
+      ["Ai Daniil Bekirov","Sparkles","San Francisco","https://www.linkedin.com/in/aidaniilbekirov/","requested","Research",""],
+      ["Ahmed AJ","Tasker AI","San Francisco","https://www.linkedin.com/in/ahmedajsf/","requested","Research",""],
+      ["Adi Singh","AgentMail","San Francisco","https://linkedin.com/in/adivirsingh13","requested","Research",""],
+      ["Matthias Schneider","ComplyDo","San Francisco","https://www.linkedin.com/in/matthias-schneider-134391223","requested","LinkedIn",""],
+      ["Adarsh Hiremath","Mercor","","https://www.linkedin.com/in/adarsh-h-623941204/","requested","LinkedIn",""],
+      ["Anna Goldie","Ricursive","","https://www.linkedin.com/in/adgoldie/","requested","LinkedIn",""],
+      ["Azalia Mirhoseini","Ricursive","San Francisco","https://www.linkedin.com/in/azalia-mirhoseini-a5308522/","requested","LinkedIn",""],
+      ["Kiana Ehsani","Vercept","San Francisco","https://www.linkedin.com/in/kiana-ehsani-1b81b0162/","requested","LinkedIn",""],
+      ["Luca Weihs","Vercept","Seattle","https://www.linkedin.com/in/lucaweihs/","requested","LinkedIn",""],
+      ["Kiran Rajkumar Kannan","Harper (YC W25)","San Francisco","https://www.linkedin.com/in/ACoAADlX9kwBbYhPeDQs6r-0IrYnnlmXhXzKxcU?skipRedirect=true","accepted","LinkedIn",""],
+      ["Amir Sorhan Karimloo","ELU","San Francisco","https://www.linkedin.com/in/ACoAACI36-EBVaGODDPXczJXZ68JwK-5mcechak?skipRedirect=true","accepted","LinkedIn","a16z"]
     ];
     return raw.map(function(r){
       return {
         id:uid(), name:r[0], company:r[1], region:r[2], linkedin:r[3],
-        source:'Research', status:'to_contact', notes:'',
+        status:r[4], source:r[5], notes:r[6],
         dateAdded: todayStr(), dateStatusChanged: todayStr()
       };
     });
   }
 
+  var SUPABASE_URL = 'https://uctyauftutvqntlkneyj.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_XuZ2kJuxinpiBKznGZvezw_o6A-snTK';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   async function loadData(){
     try{
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        people = JSON.parse(raw);
-      } else {
+      var res = await sb.from('pipeline_data').select('data').eq('id', 1).single();
+      if(res.error) throw res.error;
+      people = (res.data && res.data.data && res.data.data.length) ? res.data.data : null;
+      if(!people){
         people = seedData();
         await saveData();
       }
     }catch(e){
+      console.error('Could not reach Supabase, using local fallback', e);
       people = seedData();
-      try{ await saveData(); }catch(e2){}
     }
     render();
+    subscribeRealtime();
   }
 
   async function saveData(){
     try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+      var res = await sb.from('pipeline_data').update({ data: people }).eq('id', 1);
+      if(res.error) throw res.error;
     }catch(e){ console.error('Storage save failed', e); }
+  }
+
+  function subscribeRealtime(){
+    try{
+      sb.channel('pipeline_data_changes')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pipeline_data', filter: 'id=eq.1' }, function(payload){
+          if(payload && payload.new && payload.new.data){
+            openModal = null;
+            people = payload.new.data;
+            render();
+          }
+        })
+        .subscribe();
+    }catch(e){ console.error('Realtime subscribe failed', e); }
   }
 
   function esc(s){
@@ -400,6 +456,54 @@
   }
 
   function countAll(key){ return people.filter(function(p){return p.status===key;}).length; }
+
+  var STALE_DAYS = 25;
+
+  function daysSince(dateStr){
+    if(!dateStr) return 0;
+    var then = new Date(dateStr+'T00:00:00');
+    var now = new Date(todayStr()+'T00:00:00');
+    return Math.round((now-then)/(1000*60*60*24));
+  }
+
+  function staleList(){
+    return people.filter(function(p){
+      return (p.status==='requested' || p.status==='accepted') && daysSince(p.dateStatusChanged) >= STALE_DAYS;
+    }).sort(function(a,b){ return daysSince(b.dateStatusChanged)-daysSince(a.dateStatusChanged); });
+  }
+
+  function renderStalePanel(){
+    var stale = staleList();
+    var rowsHtml = stale.length ? stale.map(function(p){
+      var days = daysSince(p.dateStatusChanged);
+      var statusLabel = STAGES.find(function(s){return s.key===p.status;}).label;
+      var linkedinBtn = p.linkedin ? '<button class="mini-btn" onclick="PL.openLinkedin(\''+p.id+'\')">🔗 LinkedIn</button>' : '';
+      return (
+        '<div class="stale-row">'+
+          '<div>'+
+            '<div class="stale-name">'+esc(p.name)+' <span class="stale-company">· '+esc(p.company||'—')+'</span></div>'+
+            '<div class="stale-meta">'+statusLabel+' · '+days+' days no movement</div>'+
+          '</div>'+
+          '<div class="stale-actions">'+
+            linkedinBtn+
+            '<button class="mini-btn" onclick="PL.setStatusQuick(\''+p.id+'\',\'accepted\')">Accepted</button>'+
+            '<button class="mini-btn accent-clay" onclick="PL.setStatusQuick(\''+p.id+'\',\'not_interested\')">Close out (not interested)</button>'+
+          '</div>'+
+        '</div>'
+      );
+    }).join('') : '<div class="stale-empty">Nothing stale right now — you\'re on top of it.</div>';
+
+    return (
+      '<div class="stale-card">'+
+        '<div class="stale-header">'+
+          '<div class="stale-title">Needs review <span class="stale-count">'+stale.length+'</span></div>'+
+        '</div>'+
+        '<div class="stale-sub">People you contacted long ago that still show no conversation.</div>'+
+        '<div class="stale-instructions">If they never accepted the request, cancel the pending connection request on LinkedIn, then click <b>Close out (not interested)</b> to update their status. If a conversation is actually ongoing, click <b>Accepted</b> instead.</div>'+
+        '<div class="stale-rows">'+rowsHtml+'</div>'+
+      '</div>'
+    );
+  }
 
   function renderFunnel(){
     var backlog = countAll('to_contact');
@@ -510,6 +614,7 @@
       '</div>'+
 
       renderFunnel()+
+      renderStalePanel()+
 
       '<div class="toolbar">'+
         '<div class="filters">'+
@@ -527,7 +632,7 @@
 
       renderBoard()+
 
-      '<div class="footer-note">Data is stored privately in this browser only — it does not sync across devices. Click Export CSV regularly to back up your progress, and use Import CSV to bring it into a browser or device.</div>'
+      '<div class="footer-note">Synced live — anyone with this link sees the same up-to-date pipeline automatically. Export CSV is still there anytime you want an offline backup.</div>'
     );
 
     var existingModal = document.getElementById('modal-root');
@@ -632,6 +737,14 @@
     return found ? found.key : 'to_contact';
   }
 
+  function findCol(header, aliases){
+    for(var i=0;i<aliases.length;i++){
+      var idx = header.indexOf(aliases[i]);
+      if(idx>-1) return idx;
+    }
+    return -1;
+  }
+
   function importCSVFile(file){
     var reader = new FileReader();
     reader.onload = async function(e){
@@ -639,37 +752,76 @@
         var rows = parseCSV(String(e.target.result||''));
         if(!rows.length){ alert('That file looks empty.'); return; }
         var header = rows[0].map(function(h){return h.trim().toLowerCase();});
-        var idx = {
-          name: header.indexOf('name'), company: header.indexOf('company'),
-          region: header.indexOf('region'), source: header.indexOf('source'),
-          status: header.indexOf('status'), linkedin: header.indexOf('linkedin'),
-          notes: header.indexOf('notes'), dateAdded: header.indexOf('date added'),
-          dateStatusChanged: header.indexOf('date status changed')
-        };
-        if(idx.name === -1){ alert('Could not find a "Name" column — make sure this is a CSV exported from this tool.'); return; }
+
+        var idxName = header.indexOf('name');
+        var idxFirst = findCol(header, ['first name','firstname']);
+        var idxLast = findCol(header, ['last name','lastname']);
+        var idxCompany = findCol(header, ['company','company name','account name']);
+        var idxRegionNative = header.indexOf('region');
+        var idxCity = header.indexOf('city');
+        var idxCountry = header.indexOf('country');
+        var idxSource = header.indexOf('source');
+        var idxStatus = header.indexOf('status');
+        var idxLinkedin = findCol(header, ['linkedin','person linkedin url','linkedin url']);
+        var idxNotes = header.indexOf('notes');
+        var idxTitle = header.indexOf('title');
+        var idxSeniority = header.indexOf('seniority');
+        var idxDateAdded = header.indexOf('date added');
+        var idxDateChanged = header.indexOf('date status changed');
+
+        var isNativeFormat = idxName > -1 && idxDateAdded > -1;
+
+        if(!isNativeFormat && idxFirst===-1 && idxName===-1){
+          alert('Could not recognize this CSV\'s columns. Make sure it\'s exported from this tool, or a People Search export from Apollo.');
+          return;
+        }
+
         var added = 0;
         for(var r=1;r<rows.length;r++){
           var row = rows[r];
-          if(!row || !(row[idx.name]||'').trim()) continue;
+          if(!row) continue;
+          var name = idxName>-1 ? (row[idxName]||'').trim()
+            : [(idxFirst>-1?row[idxFirst]:'')||'', (idxLast>-1?row[idxLast]:'')||''].map(function(s){return s.trim();}).filter(Boolean).join(' ');
+          if(!name) continue;
+
+          var region = '';
+          if(isNativeFormat && idxRegionNative>-1){
+            region = row[idxRegionNative]||'';
+          } else {
+            var country = idxCountry>-1 ? (row[idxCountry]||'').trim() : '';
+            var city = idxCity>-1 ? (row[idxCity]||'').trim() : '';
+            if(/san francisco/i.test(city)) region = 'San Francisco';
+            else if(country && !/united states/i.test(country)) region = 'International';
+            else if(country) region = 'US (outside SF)';
+          }
+
+          var notesParts = [];
+          if(idxTitle>-1 && row[idxTitle]) notesParts.push('Title: '+row[idxTitle]);
+          if(idxSeniority>-1 && row[idxSeniority]) notesParts.push('Seniority: '+row[idxSeniority]);
+          var notes = (idxNotes>-1 && row[idxNotes]) ? row[idxNotes] : notesParts.join(' · ');
+
+          var source = (idxSource>-1 && row[idxSource]) ? row[idxSource] : (isNativeFormat ? 'Manual' : 'Apollo');
+          var status = (isNativeFormat && idxStatus>-1) ? labelToStatusKey(row[idxStatus]) : 'to_contact';
+
           people.unshift({
             id: uid(),
-            name: row[idx.name]||'',
-            company: idx.company>-1?(row[idx.company]||''):'',
-            region: idx.region>-1?(row[idx.region]||''):'',
-            source: idx.source>-1 && row[idx.source] ? row[idx.source] : 'Manual',
-            status: idx.status>-1?labelToStatusKey(row[idx.status]):'to_contact',
-            linkedin: idx.linkedin>-1?(row[idx.linkedin]||''):'',
-            notes: idx.notes>-1?(row[idx.notes]||''):'',
-            dateAdded: (idx.dateAdded>-1 && row[idx.dateAdded]) ? row[idx.dateAdded] : todayStr(),
-            dateStatusChanged: (idx.dateStatusChanged>-1 && row[idx.dateStatusChanged]) ? row[idx.dateStatusChanged] : todayStr()
+            name: name,
+            company: idxCompany>-1 ? (row[idxCompany]||'').trim() : '',
+            region: region,
+            source: source,
+            status: status,
+            linkedin: idxLinkedin>-1 ? (row[idxLinkedin]||'').trim() : '',
+            notes: notes,
+            dateAdded: (isNativeFormat && idxDateAdded>-1 && row[idxDateAdded]) ? row[idxDateAdded] : todayStr(),
+            dateStatusChanged: (isNativeFormat && idxDateChanged>-1 && row[idxDateChanged]) ? row[idxDateChanged] : todayStr()
           });
           added++;
         }
         await saveData();
         render();
-        alert('Imported '+added+' people.');
+        alert('Imported '+added+' people'+(isNativeFormat?'':' from Apollo')+' into To Contact.');
       }catch(err){
-        alert('Could not read that CSV — make sure it matches the Export CSV format from this tool.');
+        alert('Could not read that CSV — make sure it\'s exported from this tool or from Apollo.');
       }
     };
     reader.readAsText(file);
@@ -726,6 +878,14 @@
       var p = people.find(function(pp){return pp.id===id;});
       if(!p) return;
       p.status = 'requested';
+      p.dateStatusChanged = todayStr();
+      await saveData();
+      render();
+    },
+    setStatusQuick:async function(id, newStatus){
+      var p = people.find(function(pp){return pp.id===id;});
+      if(!p) return;
+      p.status = newStatus;
       p.dateStatusChanged = todayStr();
       await saveData();
       render();
