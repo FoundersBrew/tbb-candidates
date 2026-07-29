@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building Blocks — Outreach Dispatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14161F;
+    --surface:#1C1F2E;
+    --surface-2:#232741;
+    --raised:#282C48;
+    --hair:#31344a;
+    --hair-soft:#282b3d;
+    --text:#ECEAE2;
+    --text-dim:#9498AC;
+    --text-faint:#666B82;
+    --amber:#E8A33D;
+    --amber-dim:rgba(232,163,61,0.16);
+    --amber-line:rgba(232,163,61,0.4);
+    --green:#6FA287;
+    --green-dim:rgba(111,162,135,0.16);
+    --clay:#BE6A50;
+    --clay-dim:rgba(190,106,80,0.14);
+    --blue:#7C93C9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Fraunces',serif;}
+
+  a{color:var(--amber);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  button{font-family:'Inter',sans-serif;cursor:pointer;border:none;}
+  button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--amber);outline-offset:2px;
+  }
+
+  .wrap{max-width:1360px;margin:0 auto;padding:32px 28px 80px;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:1px solid var(--hair);
+    padding-bottom:20px;margin-bottom:28px;
+    gap:20px;flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--amber);margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:600;font-size:32px;
+    margin:0;letter-spacing:-0.01em;
+  }
+  .sub{color:var(--text-dim);font-size:13.5px;margin-top:6px;}
+  .topbar-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+  .btn{
+    padding:10px 16px;border-radius:8px;font-size:13.5px;font-weight:600;
+    display:inline-flex;align-items:center;gap:6px;transition:all .15s ease;
+  }
+  .btn-primary{background:var(--amber);color:#221604;}
+  .btn-primary:hover{background:#f0ae4d;}
+  .btn-ghost{background:var(--surface-2);color:var(--text);border:1px solid var(--hair);}
+  .btn-ghost:hover{background:var(--raised);}
+  .btn-danger-ghost{background:transparent;color:var(--clay);border:1px solid rgba(190,106,80,0.35);}
+  .btn-danger-ghost:hover{background:var(--clay-dim);}
+  .btn-sm{padding:6px 10px;font-size:12px;border-radius:6px;}
+
+  /* ---------- Funnel ---------- */
+  .funnel-card{
+    background:linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border:1px solid var(--hair);border-radius:14px;
+    padding:22px 24px 20px;margin-bottom:22px;
+    position:relative;overflow:hidden;
+  }
+  .funnel-title-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .funnel-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--text);}
+  .funnel-note{font-size:12px;color:var(--text-faint);}
+  .backlog-chip{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);
+    background:var(--raised);border:1px solid var(--hair);border-radius:20px;
+    padding:5px 12px;display:inline-flex;gap:6px;align-items:center;
+  }
+  .backlog-chip b{color:var(--text);font-weight:600;}
+
+  .funnel-row{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px;}
+  .funnel-stage{
+    flex:1;min-width:118px;text-align:center;padding:6px 10px;position:relative;
+  }
+  .funnel-stage .count{
+    font-family:'Fraunces',serif;font-size:34px;font-weight:600;line-height:1;
+    color:var(--text);
+  }
+  .funnel-stage.interested .count, .funnel-stage.booked .count{color:var(--amber);}
+  .funnel-stage .label{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.08em;
+    text-transform:uppercase;color:var(--text-dim);margin-top:6px;
+  }
+  .funnel-arrow{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-width:56px;color:var(--text-faint);
+  }
+  .funnel-arrow .pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green);font-weight:600;}
+  .funnel-arrow svg{opacity:0.5;margin-top:2px;}
+
+  .not-interested-strip{
+    margin-top:16px;padding-top:14px;border-top:1px solid var(--hair-soft);
+    display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text-faint);
+  }
+  .not-interested-strip .n{color:var(--clay);font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:16px;gap:12px;flex-wrap:wrap;
+  }
+  .filters{display:flex;gap:8px;flex-wrap:wrap;}
+  .filters select, .filters input{
+    background:var(--surface-2);border:1px solid var(--hair);color:var(--text);
+    border-radius:7px;padding:8px 10px;font-size:12.5px;font-family:'Inter',sans-serif;
+  }
+  .filters input{min-width:170px;}
+
+  /* ---------- Board ---------- */
+  .board{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px;}
+  .col{
+    min-width:238px;flex:1;background:var(--surface);border:1px solid var(--hair-soft);
+    border-radius:12px;padding:12px;display:flex;flex-direction:column;max-height:640px;
+  }
+  .col.not-interested{opacity:0.72;}
+  .col-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:2px 4px 12px;border-bottom:1px solid var(--hair-soft);margin-bottom:10px;
+  }
+  .col-head .name{font-size:12px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;color:var(--text-dim);}
+  .col-head .count{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--text-faint);
+    background:var(--raised);border-radius:10px;padding:2px 8px;
+  }
+  .cards{overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1;padding-right:2px;}
+  .cards::-webkit-scrollbar{width:6px;}
+  .cards::-webkit-scrollbar-thumb{background:var(--hair);border-radius:3px;}
+
+  .card{
+    background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;
+    padding:10px 11px;cursor:pointer;transition:border-color .15s ease, transform .1s ease;
+  }
+  .card:hover{border-color:var(--amber-line);}
+  .card .cname{font-size:13.5px;font-weight:600;color:var(--text);}
+  .card .ccompany{font-size:12px;color:var(--text-dim);margin-top:1px;}
+  .card .cmeta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .tag{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.05em;
+    padding:2px 6px;border-radius:5px;color:var(--text-dim);background:var(--raised);
+  }
+  .tag.apollo{color:#9CB4E8;}
+  .tag.linkedin{color:#7BB6D9;}
+  .card .cdate{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);}
+
+  .card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .mini-btn{
+    font-size:10.5px;font-family:'Inter',sans-serif;font-weight:600;
+    padding:5px 8px;border-radius:6px;background:var(--raised);color:var(--text-dim);
+    border:1px solid var(--hair);display:inline-flex;align-items:center;gap:4px;
+    transition:all .12s ease;white-space:nowrap;
+  }
+  .mini-btn:hover{color:var(--text);border-color:var(--amber-line);}
+  .mini-btn.accent{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-line);}
+  .mini-btn.accent:hover{background:var(--amber);color:#221604;}
+  .field-actions-row{display:flex;gap:8px;margin:-4px 0 14px;flex-wrap:wrap;}
+  .msg-preview{
+    background:var(--surface-2);border:1px dashed var(--hair);border-radius:8px;
+    padding:10px 11px;font-size:11.5px;color:var(--text-dim);line-height:1.55;margin-bottom:14px;
+  }
+
+  .empty-col{color:var(--text-faint);font-size:12px;text-align:center;padding:20px 4px;}
+
+  /* ---------- Modal ---------- */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(10,11,17,0.7);backdrop-filter:blur(2px);
+    display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--hair);border-radius:14px;
+    width:100%;max-width:460px;max-height:88vh;overflow-y:auto;
+    padding:24px 24px 20px;
+  }
+  .modal h3{font-family:'Fraunces',serif;font-size:19px;margin:0 0 16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:5px;
+    font-family:'IBM Plex Mono',monospace;letter-spacing:0.03em;text-transform:uppercase;}
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--surface-2);border:1px solid var(--hair);color:var(--text);
+    border-radius:7px;padding:10px 11px;font-size:13.5px;font-family:'Inter',sans-serif;
+  }
+  .field textarea{resize:vertical;min-height:64px;}
+  .row2{display:flex;gap:10px;}
+  .row2 .field{flex:1;}
+  .modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
+  .modal-actions .right{display:flex;gap:8px;}
+  .close-x{
+    position:absolute;top:16px;right:18px;background:none;color:var(--text-faint);font-size:20px;
+    line-height:1;padding:2px 6px;border-radius:6px;
+  }
+  .close-x:hover{color:var(--text);background:var(--raised);}
+  .modal{position:relative;}
+
+  .footer-note{
+    text-align:center;color:var(--text-faint);font-size:11.5px;margin-top:26px;
+  }
+
+  .loading{padding:60px;text-align:center;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+
+  @media (max-width:720px){
+    h1{font-size:24px;}
+    .funnel-stage .count{font-size:24px;}
+    .funnel-arrow{min-width:30px;}
+    .board{flex-direction:column;}
+    .col{min-width:100%;max-height:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading">Loading pipeline…</div>
+</div>
+
+<script>
+(function(){
+
+  var STAGES = [
+    { key:'to_contact',     label:'To Contact' },
+    { key:'requested',      label:'Requested' },
+    { key:'accepted',       label:'Accepted' },
+    { key:'responded',      label:'Responded' },
+    { key:'interested',     label:'Interested' },
+    { key:'booked',         label:'Booked' },
+    { key:'not_interested', label:'Not Interested' },
+    { key:'invalid_linkedin', label:'Invalid LinkedIn' }
+  ];
+  var FUNNEL_KEYS = ['requested','accepted','responded','interested','booked'];
+  var STORAGE_KEY = 'building-blocks-outreach-pipeline-v1';
+
+  var people = [];
+  var filters = { source:'all', region:'all', q:'' };
+  var openModal = null; // 'add' | person object | null
+
+  function uid(){ return 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  function buildMessage(name){
+    var first = (name||'').trim().split(' ')[0] || 'there';
+    return "Hi "+first+"! I'm part of the team for the growth initiatives for Building Blocks Podcast focused on interviewing the world's top product builders. I am intrigued abt the work you've done & would love for you to be a guest! If you are up for it, let me know and I'd be happy to dive into the details.";
+  }
+
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position='fixed'; ta.style.left='-9999px'; ta.style.top='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  function copyToClipboard(text, btnEl){
+    function flash(){
+      if(!btnEl) return;
+      var original = btnEl.textContent;
+      btnEl.textContent = 'Copied ✓';
+      setTimeout(function(){ btnEl.textContent = original; }, 1400);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(flash).catch(function(){ fallbackCopy(text); flash(); });
+    } else {
+      fallbackCopy(text); flash();
+    }
+  }
+
+  function seedData(){
+    var raw = [
+      ["Adi Singh","AgentMail","San Francisco","https://linkedin.com/in/adivirsingh13"],
+      ["Ahmed AJ","Tasker AI","San Francisco","https://www.linkedin.com/in/ahmedajsf/"],
+      ["Ai Daniil Bekirov","Sparkles","San Francisco","https://www.linkedin.com/in/aidaniilbekirov/"],
+      ["Akash Thakur","ProcIndex","San Francisco","https://www.linkedin.com/in/akashthakur1203"],
+      ["Akshay Budhkar","Spine AI","San Francisco","https://linkedin.com/in/akshay-budhkar-06259041"],
+      ["Akshay Narisetti","Pocket","San Francisco","https://www.linkedin.com/in/akshaynarisetti"],
+      ["Ali Sareini","Nautilus","San Francisco","https://www.linkedin.com/in/alisareini/"],
+      ["Amayr Babar","Nautilus","San Francisco","https://linkedin.com/in/amayrbabar"],
+      ["Angelo (KC) Huang","Swif.ai","San Francisco","https://www.linkedin.com/in/angelokh"],
+      ["Aoi Otani","Liva AI","San Francisco","https://linkedin.com/in/aoi-otani-ab3a1b205"],
+      ["Artur Romanov","Trace","International","https://linkedin.com/in/artur-romanov"],
+      ["Ashley Mo","Liva AI","San Francisco","https://www.linkedin.com/in/ashley-mo/"],
+      ["Ashwin Venkatesh Raman","Spine AI","San Francisco","https://linkedin.com/in/avraman"],
+      ["Avi Konduru","Shor","San Francisco","https://linkedin.com/in/kumaravinash-avi-konduru-54b3a6bb"],
+      ["Brandon Yao","Semiotic","San Francisco","https://www.linkedin.com/in/brandonyao/"],
+      ["Bruno Koba","Astor","San Francisco","https://www.linkedin.com/in/bruno-koba/"],
+      ["Bryan Grisales","Semiotic","San Francisco","https://www.linkedin.com/in/bryan-grisales/"],
+      ["Caleb Chan","Lance","San Francisco","https://www.linkedin.com/in/caleb-chan-327b14239/"],
+      ["Can Zehebi","Zavo","International","https://www.linkedin.com/in/canzehebi/"],
+      ["Chris Minge","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/chrisminge"],
+      ["Daivik Goel","Shor","San Francisco","https://linkedin.com/in/daivikg"],
+      ["Daniel Tulha Hochstetler","Astor","San Francisco","https://www.linkedin.com/in/daniel-hochstetler"],
+      ["Don Muir","F2","US (outside SF)","https://www.linkedin.com/in/don-muir"],
+      ["Dwarak Govind Parthiban","s2.dev","San Francisco","https://www.linkedin.com/in/dwarakgovindparthiban/"],
+      ["Evan Seeyave","TwentyTwo","US (outside SF)","https://www.linkedin.com/in/evanseeyave"],
+      ["Gabriel Dymowski","Pocket","San Francisco","https://www.linkedin.com/in/gabrieldymowski/"],
+      ["Gatik Trivedi","Lance","San Francisco","https://www.linkedin.com/in/gatik-trivedi"],
+      ["Gavin Brennen","Lance","San Francisco","https://www.linkedin.com/in/gavinbrennen/"],
+      ["Haakam Aujla","AgentMail","San Francisco","https://www.linkedin.com/in/haaaujla/"],
+      ["Ilkan Gezer","Zavo","International","https://www.linkedin.com/in/ilkan-gezer-4a16a6268"],
+      ["James Jiang","OpenBuilder","San Francisco","https://www.linkedin.com/in/jamesdreamcrafters/"],
+      ["Jess Lee","Sequoia Capital","San Francisco","https://www.linkedin.com/in/jesskah/"],
+      ["Julius Körfgen","Uplane","San Francisco","https://www.linkedin.com/in/julius-koerfgen/"],
+      ["Kevin Cox","Adaptional","San Francisco","https://www.linkedin.com/in/kevin-cox-90337b47/"],
+      ["Luigi Pederzani","Manufact","San Francisco","https://www.linkedin.com/in/luigipederzani"],
+      ["Lukas Vollmer","Uplane","San Francisco","https://www.linkedin.com/in/lukasvollmer/"],
+      ["Marvin Abdel-Massih","Uplane","San Francisco","https://www.linkedin.com/in/marvinabdel-massih/"],
+      ["Michael Chen","Yondu","US (outside SF)","https://linkedin.com/in/michael-chen-17464a1b1"],
+      ["Michael Kim","AgentMail","San Francisco","https://www.linkedin.com/in/hyun-michael-kim-281242220/"],
+      ["Michael Roberson","Semiotic","San Francisco","https://www.linkedin.com/in/michael-h-roberson/"],
+      ["Neha Suresh","ProcIndex","San Francisco","https://linkedin.com/in/nehasuresh1904"],
+      ["Pablo Hansen","Proliferate","San Francisco","https://linkedin.com/in/pablo-hansen"],
+      ["Paul Li","OpenBuilder","San Francisco","https://www.linkedin.com/in/hey-paul/"],
+      ["Pietro Zullo","Manufact","San Francisco","https://linkedin.com/in/pietrozullo"],
+      ["Raj Patel","Human Archive","San Francisco","https://www.linkedin.com/in/raj-patel2004/"],
+      ["Robin Seitz","kater.ai","San Francisco","https://linkedin.com/in/robin-seitz-12029970"],
+      ["Rushil Agarwal","Human Archive","San Francisco","https://www.linkedin.com/in/rushilagarwal261205/"],
+      ["Samay Maini","Human Archive","San Francisco","https://www.linkedin.com/in/samaymaini/"],
+      ["Shikhar Bhushan","s2.dev","San Francisco","https://linkedin.com/in/shikhrr"],
+      ["Shloke Patel","Human Archive","San Francisco","https://www.linkedin.com/in/shloke-patel/"],
+      ["Stephen Balogh","s2.dev","San Francisco","https://www.linkedin.com/in/stephen-balogh-078a4995/"],
+      ["Suril Kantaria","Adaptional","San Francisco","https://www.linkedin.com/in/suril-kantaria-59522922/"],
+      ["Tahmid Jamal","Yondu","US (outside SF)","https://linkedin.com/in/74hm1d"],
+      ["Tanner Jones","Vulcan Technologies","US (outside SF)","https://www.linkedin.com/in/tanner-jones-817192167/"],
+      ["Tim Cherkasov","Trace","International","https://linkedin.com/in/timcherkasov"],
+      ["Vedant Singh","Salus","San Francisco","https://www.linkedin.com/in/thevedantsingh/"],
+      ["Yvonne Chou","kater.ai","San Francisco","https://linkedin.com/in/yvonne-chou"]
+    ];
+    return raw.map(function(r){
+      return {
+        id:uid(), name:r[0], company:r[1], region:r[2], linkedin:r[3],
+        source:'Research', status:'to_contact', notes:'',
+        dateAdded: todayStr(), dateStatusChanged: todayStr()
+      };
+    });
+  }
+
+  async function loadData(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        people = JSON.parse(raw);
+      } else {
+        people = seedData();
+        await saveData();
+      }
+    }catch(e){
+      people = seedData();
+      try{ await saveData(); }catch(e2){}
+    }
+    render();
+  }
+
+  async function saveData(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+    }catch(e){ console.error('Storage save failed', e); }
+  }
+
+  function esc(s){
+    return (s||'').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function filteredPeople(){
+    return people.filter(function(p){
+      if(filters.source!=='all' && p.source!==filters.source) return false;
+      if(filters.region!=='all' && p.region!==filters.region) return false;
+      if(filters.q){
+        var q = filters.q.toLowerCase();
+        if(!(p.name.toLowerCase().indexOf(q)>-1 || p.company.toLowerCase().indexOf(q)>-1)) return false;
+      }
+      return true;
+    });
+  }
+
+  function countAll(key){ return people.filter(function(p){return p.status===key;}).length; }
+
+  function renderFunnel(){
+    var backlog = countAll('to_contact');
+    var counts = FUNNEL_KEYS.map(countAll);
+    var notInterested = countAll('not_interested');
+    var invalidLinkedin = countAll('invalid_linkedin');
+
+    var stagesHtml = '';
+    for(var i=0;i<FUNNEL_KEYS.length;i++){
+      var key = FUNNEL_KEYS[i];
+      var label = STAGES.find(function(s){return s.key===key;}).label;
+      var cls = (key==='interested'||key==='booked') ? ' '+key : '';
+      stagesHtml += '<div class="funnel-stage'+cls+'"><div class="count mono">'+counts[i]+'</div><div class="label">'+label+'</div></div>';
+      if(i < FUNNEL_KEYS.length-1){
+        var from = counts[i], to = counts[i+1];
+        var pct = from>0 ? Math.round((to/from)*100) : 0;
+        stagesHtml += '<div class="funnel-arrow"><svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M1 7H18M18 7L12 1M18 7L12 13" stroke="currentColor" stroke-width="1.6"/></svg><div class="pct mono">'+(from>0?pct+'%':'—')+'</div></div>';
+      }
+    }
+
+    return (
+      '<div class="funnel-card">'+
+        '<div class="funnel-title-row">'+
+          '<div class="funnel-title">Outreach funnel</div>'+
+          '<div class="backlog-chip">Backlog <b class="mono">'+backlog+'</b> sourced, not yet contacted</div>'+
+        '</div>'+
+        '<div class="funnel-row">'+stagesHtml+'</div>'+
+        '<div class="not-interested-strip">'+
+          '<span>Closed — not interested:</span> <span class="n">'+notInterested+'</span>'+
+          '<span style="margin-left:16px;">Invalid LinkedIn (unable to contact):</span> <span class="n">'+invalidLinkedin+'</span>'+
+        '</div>'+
+      '</div>'
+    );
+  }
+
+  function sourceTagClass(src){
+    if(src==='Apollo') return 'apollo';
+    if(src==='LinkedIn') return 'linkedin';
+    return '';
+  }
+
+  function renderCard(p){
+    var linkedinBtn = p.linkedin
+      ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.openLinkedin(\''+p.id+'\')" title="Open LinkedIn profile">🔗 LinkedIn</button>'
+      : '<span class="mini-btn" style="opacity:.4;cursor:default;">No LinkedIn</span>';
+    var copyBtn = '<button class="mini-btn" onclick="event.stopPropagation(); PL.copyMessage(\''+p.id+'\', this)">✉ Copy msg</button>';
+    var sentBtn = p.status==='to_contact'
+      ? '<button class="mini-btn accent" onclick="event.stopPropagation(); PL.markSent(\''+p.id+'\')">Sent request →</button>'
+      : '';
+    return (
+      '<div class="card" data-id="'+p.id+'" onclick="PL.openDetail(\''+p.id+'\')">'+
+        '<div class="cname">'+esc(p.name)+'</div>'+
+        '<div class="ccompany">'+esc(p.company||'—')+'</div>'+
+        '<div class="cmeta">'+
+          '<span class="tag '+sourceTagClass(p.source)+'">'+esc(p.source)+'</span>'+
+          '<span class="cdate">'+esc(p.dateStatusChanged||'')+'</span>'+
+        '</div>'+
+        '<div class="card-actions">'+linkedinBtn+copyBtn+sentBtn+'</div>'+
+      '</div>'
+    );
+  }
+
+  function renderBoard(){
+    var fp = filteredPeople();
+    var colsHtml = '';
+    STAGES.forEach(function(st){
+      var items = fp.filter(function(p){return p.status===st.key;});
+      var cardsHtml = items.length
+        ? items.map(renderCard).join('')
+        : '<div class="empty-col">No one here</div>';
+      var isClosedState = (st.key==='not_interested' || st.key==='invalid_linkedin');
+      colsHtml += (
+        '<div class="col'+(isClosedState?' not-interested':'')+'">'+
+          '<div class="col-head"><span class="name">'+st.label+'</span><span class="count mono">'+items.length+'</span></div>'+
+          '<div class="cards">'+cardsHtml+'</div>'+
+        '</div>'
+      );
+    });
+    return '<div class="board">'+colsHtml+'</div>';
+  }
+
+  function uniqueRegions(){
+    var set = {};
+    people.forEach(function(p){ if(p.region) set[p.region]=true; });
+    return Object.keys(set);
+  }
+
+  function render(){
+    var app = document.getElementById('app');
+    var regions = uniqueRegions();
+    var regionOptions = '<option value="all">All regions</option>' + regions.map(function(r){
+      return '<option value="'+esc(r)+'"'+(filters.region===r?' selected':'')+'>'+esc(r)+'</option>';
+    }).join('');
+
+    app.innerHTML = (
+      '<div class="topbar">'+
+        '<div>'+
+          '<div class="eyebrow">Building Blocks Podcast</div>'+
+          '<h1>Outreach Dispatch</h1>'+
+          '<div class="sub">Guest sourcing pipeline · updated live as you work</div>'+
+        '</div>'+
+        '<div class="topbar-actions">'+
+          '<input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="PL.handleImportFile(this)">'+
+          '<button class="btn btn-ghost" onclick="document.getElementById(\'import-csv-input\').click()">Import CSV</button>'+
+          '<button class="btn btn-ghost" onclick="PL.exportCSV()">Export CSV</button>'+
+          '<button class="btn btn-primary" onclick="PL.openAdd()">+ Add person</button>'+
+        '</div>'+
+      '</div>'+
+
+      renderFunnel()+
+
+      '<div class="toolbar">'+
+        '<div class="filters">'+
+          '<input type="text" placeholder="Search name or company…" value="'+esc(filters.q)+'" oninput="PL.setFilter(\'q\', this.value)">'+
+          '<select onchange="PL.setFilter(\'source\', this.value)">'+
+            '<option value="all"'+(filters.source==='all'?' selected':'')+'>All sources</option>'+
+            '<option value="Apollo"'+(filters.source==='Apollo'?' selected':'')+'>Apollo</option>'+
+            '<option value="LinkedIn"'+(filters.source==='LinkedIn'?' selected':'')+'>LinkedIn</option>'+
+            '<option value="Research"'+(filters.source==='Research'?' selected':'')+'>Research</option>'+
+            '<option value="Manual"'+(filters.source==='Manual'?' selected':'')+'>Manual</option>'+
+          '</select>'+
+          '<select onchange="PL.setFilter(\'region\', this.value)">'+regionOptions+'</select>'+
+        '</div>'+
+      '</div>'+
+
+      renderBoard()+
+
+      '<div class="footer-note">Data is stored privately in this browser only — it does not sync across devices. Click Export CSV regularly to back up your progress, and use Import CSV to bring it into a browser or device.</div>'
+    );
+
+    var existingModal = document.getElementById('modal-root');
+    if(existingModal) existingModal.remove();
+    if(openModal) renderModal();
+  }
+
+  function renderModal(){
+    var existing = document.getElementById('modal-root');
+    if(existing) existing.remove();
+
+    var isAdd = openModal === 'add';
+    var p = isAdd ? {name:'',company:'',region:'San Francisco',source:'LinkedIn',linkedin:'',status:'to_contact',notes:''} : openModal;
+
+    var stageOptions = STAGES.map(function(s){
+      return '<option value="'+s.key+'"'+(p.status===s.key?' selected':'')+'>'+s.label+'</option>';
+    }).join('');
+
+    var sourceOptions = ['Apollo','LinkedIn','Research','Manual'].map(function(s){
+      return '<option value="'+s+'"'+(p.source===s?' selected':'')+'>'+s+'</option>';
+    }).join('');
+
+    var div = document.createElement('div');
+    div.id = 'modal-root';
+    div.className = 'modal-bg';
+    div.onclick = function(e){ if(e.target===div){ PL.closeModal(); } };
+    div.innerHTML = (
+      '<div class="modal">'+
+        '<button class="close-x" onclick="PL.closeModal()">×</button>'+
+        '<h3>'+(isAdd?'Add person':'Edit person')+'</h3>'+
+        '<div class="field"><label>Name</label><input id="f-name" value="'+esc(p.name)+'" placeholder="Full name"></div>'+
+        '<div class="row2">'+
+          '<div class="field"><label>Company</label><input id="f-company" value="'+esc(p.company)+'" placeholder="Company"></div>'+
+          '<div class="field"><label>Region</label><input id="f-region" value="'+esc(p.region)+'" placeholder="San Francisco"></div>'+
+        '</div>'+
+        '<div class="field"><label>LinkedIn URL</label><input id="f-linkedin" value="'+esc(p.linkedin)+'" placeholder="https://linkedin.com/in/…"></div>'+
+        (!isAdd ? (
+          '<div class="field-actions-row">'+
+            (p.linkedin ? '<button class="mini-btn" onclick="PL.openLinkedin(\''+p.id+'\')">🔗 Open LinkedIn profile</button>' : '')+
+            '<button class="mini-btn" onclick="PL.copyMessage(\''+p.id+'\', this)">✉ Copy connection message</button>'+
+          '</div>'+
+          '<div class="msg-preview">'+esc(buildMessage(p.name))+'</div>'
+        ) : '')+
+        '<div class="row2">'+
+          '<div class="field"><label>Source</label><select id="f-source">'+sourceOptions+'</select></div>'+
+          '<div class="field"><label>Status</label><select id="f-status">'+stageOptions+'</select></div>'+
+        '</div>'+
+        '<div class="field"><label>Notes</label><textarea id="f-notes" placeholder="e.g. sent connection note referencing their launch post">'+esc(p.notes)+'</textarea></div>'+
+        (!isAdd && p.status==='to_contact' ? '<button class="mini-btn accent" style="margin-bottom:14px;" onclick="PL.markSent(\''+p.id+'\')">Sent request → mark as Requested</button>' : '')+
+        '<div class="modal-actions">'+
+          (isAdd ? '<span></span>' : '<button class="btn btn-danger-ghost btn-sm" onclick="PL.deletePerson(\''+p.id+'\')">Delete</button>')+
+          '<div class="right">'+
+            '<button class="btn btn-ghost btn-sm" onclick="PL.closeModal()">Cancel</button>'+
+            '<button class="btn btn-primary btn-sm" onclick="PL.savePerson(\''+(isAdd?'':p.id)+'\')">Save</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    );
+    document.body.appendChild(div);
+  }
+
+  function exportCSV(){
+    var headers = ['Name','Company','Region','Source','Status','LinkedIn','Notes','Date Added','Date Status Changed'];
+    var lines = [headers.join(',')];
+    people.forEach(function(p){
+      var stageLabel = STAGES.find(function(s){return s.key===p.status;});
+      var row = [p.name,p.company,p.region,p.source,(stageLabel?stageLabel.label:p.status),p.linkedin,p.notes,p.dateAdded,p.dateStatusChanged]
+        .map(function(v){ v = (v||'').toString().replace(/"/g,'""'); return '"'+v+'"'; });
+      lines.push(row.join(','));
+    });
+    var blob = new Blob([lines.join('\n')], {type:'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'outreach-pipeline-'+todayStr()+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function parseCSV(text){
+    var rows = [], field='', row=[], inQuotes=false, i=0;
+    while(i < text.length){
+      var c = text[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field+='"'; i+=2; continue; }
+          inQuotes = false; i++; continue;
+        } else { field+=c; i++; continue; }
+      } else {
+        if(c === '"'){ inQuotes=true; i++; continue; }
+        if(c === ','){ row.push(field); field=''; i++; continue; }
+        if(c === '\r'){ i++; continue; }
+        if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+        field+=c; i++; continue;
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(function(r){ return r.length>1 || (r[0]||'').trim()!==''; });
+  }
+
+  function labelToStatusKey(label){
+    var found = STAGES.find(function(s){ return s.label.toLowerCase()===String(label||'').trim().toLowerCase(); });
+    return found ? found.key : 'to_contact';
+  }
+
+  function importCSVFile(file){
+    var reader = new FileReader();
+    reader.onload = async function(e){
+      try{
+        var rows = parseCSV(String(e.target.result||''));
+        if(!rows.length){ alert('That file looks empty.'); return; }
+        var header = rows[0].map(function(h){return h.trim().toLowerCase();});
+        var idx = {
+          name: header.indexOf('name'), company: header.indexOf('company'),
+          region: header.indexOf('region'), source: header.indexOf('source'),
+          status: header.indexOf('status'), linkedin: header.indexOf('linkedin'),
+          notes: header.indexOf('notes'), dateAdded: header.indexOf('date added'),
+          dateStatusChanged: header.indexOf('date status changed')
+        };
+        if(idx.name === -1){ alert('Could not find a "Name" column — make sure this is a CSV exported from this tool.'); return; }
+        var added = 0;
+        for(var r=1;r<rows.length;r++){
+          var row = rows[r];
+          if(!row || !(row[idx.name]||'').trim()) continue;
+          people.unshift({
+            id: uid(),
+            name: row[idx.name]||'',
+            company: idx.company>-1?(row[idx.company]||''):'',
+            region: idx.region>-1?(row[idx.region]||''):'',
+            source: idx.source>-1 && row[idx.source] ? row[idx.source] : 'Manual',
+            status: idx.status>-1?labelToStatusKey(row[idx.status]):'to_contact',
+            linkedin: idx.linkedin>-1?(row[idx.linkedin]||''):'',
+            notes: idx.notes>-1?(row[idx.notes]||''):'',
+            dateAdded: (idx.dateAdded>-1 && row[idx.dateAdded]) ? row[idx.dateAdded] : todayStr(),
+            dateStatusChanged: (idx.dateStatusChanged>-1 && row[idx.dateStatusChanged]) ? row[idx.dateStatusChanged] : todayStr()
+          });
+          added++;
+        }
+        await saveData();
+        render();
+        alert('Imported '+added+' people.');
+      }catch(err){
+        alert('Could not read that CSV — make sure it matches the Export CSV format from this tool.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  window.PL = {
+    setFilter:function(key,val){ filters[key]=val; render(); },
+    openAdd:function(){ openModal='add'; render(); },
+    openDetail:function(id){ openModal = people.find(function(p){return p.id===id;}); render(); },
+    closeModal:function(){ openModal=null; render(); },
+    savePerson:async function(id){
+      var name = document.getElementById('f-name').value.trim();
+      if(!name){ document.getElementById('f-name').focus(); return; }
+      var data = {
+        name:name,
+        company:document.getElementById('f-company').value.trim(),
+        region:document.getElementById('f-region').value.trim(),
+        linkedin:document.getElementById('f-linkedin').value.trim(),
+        source:document.getElementById('f-source').value,
+        status:document.getElementById('f-status').value,
+        notes:document.getElementById('f-notes').value.trim()
+      };
+      if(id){
+        var p = people.find(function(pp){return pp.id===id;});
+        var statusChanged = p.status !== data.status;
+        Object.assign(p, data);
+        if(statusChanged) p.dateStatusChanged = todayStr();
+      } else {
+        data.id = uid();
+        data.dateAdded = todayStr();
+        data.dateStatusChanged = todayStr();
+        people.unshift(data);
+      }
+      openModal = null;
+      await saveData();
+      render();
+    },
+    deletePerson:async function(id){
+      people = people.filter(function(p){return p.id!==id;});
+      openModal = null;
+      await saveData();
+      render();
+    },
+    openLinkedin:function(id){
+      var p = people.find(function(pp){return pp.id===id;});
+      if(p && p.linkedin) window.open(p.linkedin, '_blank', 'noopener');
+    },
+    copyMessage:function(id, btnEl){
+      var p = people.find(function(pp){return pp.id===id;});
+      if(!p) return;
+      copyToClipboard(buildMessage(p.name), btnEl);
+    },
+    markSent:async function(id){
+      var p = people.find(function(pp){return pp.id===id;});
+      if(!p) return;
+      p.status = 'requested';
+      p.dateStatusChanged = todayStr();
+      await saveData();
+      render();
+    },
+    exportCSV:exportCSV,
+    handleImportFile:function(inputEl){
+      var file = inputEl.files && inputEl.files[0];
+      if(file) importCSVFile(file);
+      inputEl.value = '';
+    }
+  };
+
+  loadData();
+})();
+</script>
+</body>
+</html>
