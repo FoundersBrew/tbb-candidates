@@ -499,7 +499,7 @@
           '<div class="stale-title">Needs review <span class="stale-count">'+stale.length+'</span></div>'+
         '</div>'+
         '<div class="stale-sub">People you contacted long ago that still show no conversation.</div>'+
-        '<div class="stale-instructions">If they never accepted the request, cancel the pending connection request on LinkedIn, then click <b>Close out (not interested)</b> to update their status. If a conversation is actually ongoing, click <b>Accepted</b> instead.</div>'+
+        '<div class="stale-instructions">Cancel connection req.</div>'+
         '<div class="stale-rows">'+rowsHtml+'</div>'+
       '</div>'
     );
@@ -745,6 +745,23 @@
     return -1;
   }
 
+  function normalizeUrl(url){
+    return (url||'').trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/+$/,'');
+  }
+  function normalizeText(s){ return (s||'').trim().toLowerCase(); }
+
+  function isDuplicate(candidate){
+    var candLi = normalizeUrl(candidate.linkedin);
+    var candName = normalizeText(candidate.name);
+    var candCompany = normalizeText(candidate.company);
+    return people.some(function(p){
+      var pLi = normalizeUrl(p.linkedin);
+      if(candLi && pLi && candLi===pLi) return true;
+      if(candName && candName===normalizeText(p.name) && candCompany===normalizeText(p.company)) return true;
+      return false;
+    });
+  }
+
   function importCSVFile(file){
     var reader = new FileReader();
     reader.onload = async function(e){
@@ -776,7 +793,7 @@
           return;
         }
 
-        var added = 0;
+        var added = 0, skipped = 0;
         for(var r=1;r<rows.length;r++){
           var row = rows[r];
           if(!row) continue;
@@ -802,15 +819,22 @@
 
           var source = (idxSource>-1 && row[idxSource]) ? row[idxSource] : (isNativeFormat ? 'Manual' : 'Apollo');
           var status = (isNativeFormat && idxStatus>-1) ? labelToStatusKey(row[idxStatus]) : 'to_contact';
+          var company = idxCompany>-1 ? (row[idxCompany]||'').trim() : '';
+          var linkedin = idxLinkedin>-1 ? (row[idxLinkedin]||'').trim() : '';
+
+          if(isDuplicate({name:name, company:company, linkedin:linkedin})){
+            skipped++;
+            continue;
+          }
 
           people.unshift({
             id: uid(),
             name: name,
-            company: idxCompany>-1 ? (row[idxCompany]||'').trim() : '',
+            company: company,
             region: region,
             source: source,
             status: status,
-            linkedin: idxLinkedin>-1 ? (row[idxLinkedin]||'').trim() : '',
+            linkedin: linkedin,
             notes: notes,
             dateAdded: (isNativeFormat && idxDateAdded>-1 && row[idxDateAdded]) ? row[idxDateAdded] : todayStr(),
             dateStatusChanged: (isNativeFormat && idxDateChanged>-1 && row[idxDateChanged]) ? row[idxDateChanged] : todayStr()
@@ -819,7 +843,7 @@
         }
         await saveData();
         render();
-        alert('Imported '+added+' people'+(isNativeFormat?'':' from Apollo')+' into To Contact.');
+        alert('Imported '+added+' new people'+(isNativeFormat?'':' from Apollo')+' into To Contact.'+(skipped?(' Skipped '+skipped+' already in your pipeline.'):''));
       }catch(err){
         alert('Could not read that CSV — make sure it\'s exported from this tool or from Apollo.');
       }
@@ -850,6 +874,10 @@
         Object.assign(p, data);
         if(statusChanged) p.dateStatusChanged = todayStr();
       } else {
+        if(isDuplicate(data)){
+          alert('This person (matched by LinkedIn URL or name+company) is already in your pipeline. Not adding a duplicate.');
+          return;
+        }
         data.id = uid();
         data.dateAdded = todayStr();
         data.dateStatusChanged = todayStr();
