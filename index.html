@@ -216,6 +216,41 @@
   .mini-btn.accent-clay:hover{background:var(--clay);color:#1c0f0a;}
   .stale-empty{font-size:12.5px;color:var(--text-faint);padding:4px 2px 0;}
 
+  /* ---------- Mode switcher ---------- */
+  .mode-switch{display:flex;gap:6px;margin-bottom:22px;border-bottom:1px solid var(--hair);padding-bottom:0;}
+  .mode-btn{
+    background:none;border:none;color:var(--text-faint);font-size:13px;font-weight:600;
+    padding:10px 4px;margin-right:18px;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;
+  }
+  .mode-btn.active{color:var(--text);border-bottom-color:var(--amber);}
+  .mode-btn:hover{color:var(--text);}
+
+  /* ---------- Connections (GTM) view ---------- */
+  .daily-card{
+    background:linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border:1px solid var(--hair);border-radius:14px;padding:20px 22px;margin-bottom:22px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  }
+  .daily-left .daily-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;}
+  .daily-left .daily-sub{font-size:12px;color:var(--text-dim);margin-top:4px;}
+  .daily-count{text-align:right;}
+  .daily-count .n{font-family:'Fraunces',serif;font-size:38px;font-weight:600;}
+  .daily-count .n.over{color:var(--clay);}
+  .daily-count .n.ok{color:var(--amber);}
+  .daily-count .lbl{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;}
+  .daily-bar{width:220px;height:6px;border-radius:4px;background:var(--raised);overflow:hidden;margin-top:8px;}
+  .daily-bar-fill{height:100%;background:var(--amber);border-radius:4px;transition:width .2s ease;}
+  .daily-bar-fill.over{background:var(--clay);}
+
+  .conn-board{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px;}
+  .conn-col{min-width:238px;flex:1;background:var(--surface);border:1px solid var(--hair-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;max-height:640px;}
+  .conn-col.closed{opacity:0.72;}
+  .conn-card{background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;padding:10px 11px;margin-bottom:8px;}
+  .conn-card .cname{font-size:13.5px;font-weight:600;color:var(--text);}
+  .conn-card .ccompany{font-size:12px;color:var(--text-dim);margin-top:1px;}
+  .conn-card .ccountry{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;}
+  .conn-card .cactions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+
   /* ---------- Modal ---------- */
   .modal-bg{
     position:fixed;inset:0;background:rgba(10,11,17,0.7);backdrop-filter:blur(2px);
@@ -285,6 +320,18 @@
   var people = [];
   var filters = { source:'all', region:'all', q:'' };
   var openModal = null; // 'add' | person object | null
+
+  var currentMode = 'guests'; // 'guests' | 'connections'
+  var connections = [];
+  var connModal = null;
+  var connFilters = { country:'all', q:'' };
+  var DAILY_TARGET = 25;
+  var CONN_STAGES = [
+    { key:'to_connect', label:'To Connect' },
+    { key:'sent', label:'Sent' },
+    { key:'accepted', label:'Accepted' },
+    { key:'not_accepted', label:'Not Accepted' }
+  ];
 
   function uid(){ return 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
   function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -395,6 +442,163 @@
     });
   }
 
+  function connectionSeedData(){
+    // [name, company, country, linkedin] — international YC S26 founders, from Paulina's sheet
+    var raw = [
+      ["Ksenia Lesko","Caution","Russia","https://www.linkedin.com/in/ksenialesko/"],
+      ["Ramtin Shahzanian","Magma","Iran","https://www.linkedin.com/in/ramtin-shahzanian/"],
+      ["Emile Germonpre","Atomarine","Belgium","https://www.linkedin.com/in/emile-germonpr%C3%A9-766045245/"],
+      ["Dimitris Koutentakis","Atomarine","Greece","https://www.linkedin.com/in/dkoutentakis/"],
+      ["Philip Moniaga","Billow AI Labs","Indonesia","https://www.linkedin.com/in/philipmoniaga/"],
+      ["Anish Mariathasan","Osseus","United Kingdom","https://www.linkedin.com/in/anishmariathasan/"],
+      ["Ayush Patel","Osseus","United Kingdom","https://www.linkedin.com/in/ayush-patel4/"],
+      ["Jay Chooi","Robocurve","Malaysia","https://www.linkedin.com/in/jeqcho/"],
+      ["Karan Brar","hiloop","Canada","https://www.linkedin.com/in/brarkaran"],
+      ["Robin Lee","Dawn Industries","South Korea","https://www.linkedin.com/in/robinlee02/"],
+      ["Najmuzzaman (Nazz) Mohammad","Nex","India","https://linkedin.com/in/najmuzzaman"],
+      ["Guy Ben Aharon","OneCLI","Israel","https://www.linkedin.com/in/guy-ben-aharon/"],
+      ["Jonathan Fishner","OneCLI","Israel","https://www.linkedin.com/in/jonathanfishner"],
+      ["Hisham El-Halabi","Vernius Systems, Inc.","Canada","https://www.linkedin.com/in/hisham-el-halabi-001/"],
+      ["Cheng-Wei Hu","Wondering","Taiwan","https://www.linkedin.com/in/cwhu"],
+      ["Angelica Kosasih","Wondering","Indonesia","https://www.linkedin.com/in/angelica-kosasih/"],
+      ["Adam Rida","Tracer","France","https://www.linkedin.com/in/adam-rida-581296142"],
+      ["Campbell Mercer-Butcher","Avoca Systems","New Zealand","https://www.linkedin.com/in/campbell-mercer-butcher"],
+      ["Max Shand","Avoca Systems","Australia","https://www.linkedin.com/in/max-shand-700a3ab5/"],
+      ["Emre Isik","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/emre-i-6a88aa193"],
+      ["Hakan Enes Aksu","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/hakan-enes-aksu/"],
+      ["Ali Eren Aytekin","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/ali-eren-aytekin-6305a41aa/"],
+      ["James Walton","Earendil Robotics","United Kingdom","https://www.linkedin.com/in/james-walton-79b35339a/"],
+      ["Kingston Kuan","Hebbian Robotics","Singapore","https://www.linkedin.com/in/kingston-kuan/"],
+      ["Brandon Ong","Hebbian Robotics","Singapore","https://linkedin.com/in/ongjjbrandon"],
+      ["Conrad Froyland Moe","PRINCEPS","Norway","https://www.linkedin.com/in/conrad-fr%C3%B8yland-moe-7950b1229/"],
+      ["Anya Trofimova","PRINCEPS","United Kingdom","https://www.linkedin.com/in/anyatrofimova"],
+      ["Govind Kavaturi","Dock","India","https://www.linkedin.com/in/govindkavaturi/"],
+      ["Dan Danay","Verdict Machine","Israel","https://www.linkedin.com/in/dandanay/"],
+      ["Karan Raina","HyperProbe","India","https://www.linkedin.com/in/karanraina/"],
+      ["Shailendra Singh","HyperProbe","India","https://www.linkedin.com/in/shailendra-singh-6540b8b/"],
+      ["Damian Szumski","Skymerse","Poland","https://www.linkedin.com/in/damian-szumski/"],
+      ["Niki Kotecha","Lamb Labs","United Kingdom","https://www.linkedin.com/in/niki-kotecha/"],
+      ["Thomas Lanning","Lamb Labs","United Kingdom","https://www.linkedin.com/in/thomas-lanning/"],
+      ["Ansh Chokshi","Mireye","Canada","https://www.linkedin.com/in/ansh-chokshi/"],
+      ["Sarthak Aggarwal","Decawork","India","https://www.linkedin.com/in/sarthak-agg/"],
+      ["Aman Raj","Decawork","India","https://linkedin.com/in/aman-raj-84636a158"],
+      ["Saman Sayahpour","Axelrod","Austria","https://www.linkedin.com/in/sayahpour/"],
+      ["Adrian Lucas Tariel Stoica","Axelrod","Germany","https://www.linkedin.com/in/stoicaadrian/"],
+      ["Mohit Gupta","Levocred AI","India","https://www.linkedin.com/in/guptamohit2299/"],
+      ["Saksham Gupta","Levocred AI","India","https://www.linkedin.com/in/gupsak"],
+      ["Rohan Seelamsetty","Praxis AI","India","https://www.linkedin.com/in/rohan-s-1186b2214"],
+      ["Melvin Chen","Care GP","China","https://www.linkedin.com/in/melvinchen/"],
+      ["Maryam Jahed","Radley","Canada","https://linkedin.com/in/maryamjahed"],
+      ["Shubham Palriwala","Agnost AI","India","https://www.linkedin.com/in/shubhampalriwala/"],
+      ["Parth Ajmera","Agnost AI","India","https://www.linkedin.com/in/parthajmera/"],
+      ["Karen Serfaty","Agentcard","Argentina","https://www.linkedin.com/in/keyserfaty/"],
+      ["Felipe Abello","Agentcard","Colombia","https://linkedin.com/in/pipe-abello-2512b9195"],
+      ["Johnny Doyle","ProvenMetal","Ireland","https://www.linkedin.com/in/johnny-doyle-69022718a/"],
+      ["Will Carkner","ProvenMetal","Ireland","https://www.linkedin.com/in/will-carkner-518b77228/"],
+      ["Paul Conyngham","Gamgee","Australia","https://www.linkedin.com/in/paustevenlconyngham/"],
+      ["Ray Liao","Inkbox","China","https://www.linkedin.com/in/ruizhi-liao/"],
+      ["Dima Vremenko","Inkbox","Ukraine","https://www.linkedin.com/in/dimavrem/"],
+      ["Anderson Chen","Operon","Taiwan","https://www.linkedin.com/in/anderson-chen-2b6941216/"],
+      ["Dev Mandal","Markov","India","https://www.linkedin.com/in/dev-mandal-iitm/"],
+      ["Harish Ashok","Markov","India","https://www.linkedin.com/in/harish-ashok"],
+      ["Mingi Kwon","Familiar","South Korea","https://www.linkedin.com/in/kwonmingi"],
+      ["Maryanne Alhallak","Lumeria","Syria","https://www.linkedin.com/in/maryanne-alhallak-33b250241"],
+      ["Emil Ares","Marengo","United Kingdom","https://www.linkedin.com/in/emil-ares"],
+      ["Tushar Goyal","Waybill","India","https://www.linkedin.com/in/thetushargoyal/"],
+      ["Rishi Laddha","Waybill","India","https://www.linkedin.com/in/rishiladdha"],
+      ["Riki Karjalainen","Last Accounting Company","Finland","https://www.linkedin.com/in/riki-karjalainen-22a612189"],
+      ["Sami Laakkonen","Last Accounting Company","Finland","https://www.linkedin.com/in/sami-laakkonen/"],
+      ["Veikko Pere","Last Accounting Company","Finland","https://www.linkedin.com/in/veikkopere/"],
+      ["Pietari Virkkunen","Last Accounting Company","Finland","https://www.linkedin.com/in/pietarivirkkunen/"],
+      ["Harper Dammann Smith","Pacific","United Kingdom","https://www.linkedin.com/in/harper-dammann-smith/"],
+      ["Akash Sadashivapeth","Luca IQ","India","https://www.linkedin.com/in/akash-sadashivapeth/"],
+      ["Francisco Serra-Martins","Isengard Industries Inc","Australia","https://www.linkedin.com/in/franciscoserramartins/"],
+      ["James Tennant","Isengard Industries Inc","Australia","https://www.linkedin.com/in/jamesjtennant/"],
+      ["Ahmad Saroya","Moving Atoms","United Kingdom","https://www.linkedin.com/in/ahmad-saroya-a05400237/"],
+      ["Shehryar Saroya","Moving Atoms","United Kingdom","https://linkedin.com/in/shehryar-saroya"],
+      ["Alex Hyungwoo Noh","6thSense","South Korea","https://www.linkedin.com/in/hyungwoonoh/"],
+      ["Shreenabh Agrawal","Aktoria Robotics","India","https://www.linkedin.com/in/shreenabh/"],
+      ["Zander Schweitzer","Alloovium","Australia","https://www.linkedin.com/in/zander-schweitzer-1a0651205"],
+      ["Cielo Nicolosi","Alloovium","Australia","https://www.linkedin.com/in/cielo-nicolosi/"],
+      ["Kushagra Chitkara","Almanac","India","https://www.linkedin.com/in/kushagra-chitkara-2b3226192"],
+      ["Rohan Sharma","Almanac","India","https://www.linkedin.com/in/rohan-sharma-b6275219b/"],
+      ["Divit Sheth","Almanac","India","https://www.linkedin.com/in/divit-sheth/"],
+      ["Karon Pangestu","Arbital","Indonesia","https://www.linkedin.com/in/pangestukaron/"],
+      ["Vincent Owen Toniwan","Arbital","Malaysia","https://www.linkedin.com/in/vincent-owen-202a9821a/"],
+      ["Henrik Brun Fevang","Audun","Norway","https://www.linkedin.com/in/henrik-brun-fevang-8b5b18195"],
+      ["Jacob Hambro","Audun","Norway","https://www.linkedin.com/in/jacob-fagerlund-hambro-70a9b1153/"],
+      ["Magnus Vonen","Audun","Norway","https://www.linkedin.com/in/magnus-nj%C3%B8lstad-vonen-518945208"],
+      ["Mathieu Perez","COACH","France","https://www.linkedin.com/in/mathieu-perez-719019201/"],
+      ["Thomas Perez","COACH","France","https://www.linkedin.com/in/thomas-perez-13011/"],
+      ["Nicolas Sebag","COACH","France","https://www.linkedin.com/in/nicolas-sebag-504747118/"],
+      ["Michael Zhou","Codag","Canada","https://www.linkedin.com/in/mzxzhou/"],
+      ["Chris Liu","DeepReach Inc.","China","https://www.linkedin.com/in/drxcliu"],
+      ["Mazin Al-Ani","Definite","Canada","https://www.linkedin.com/in/mazinalani/"],
+      ["Farhan Ur Rehman","Definite","Canada","https://www.linkedin.com/in/farhan-ur-rehman/"],
+      ["Gurshabd Singh Varaich","Definite","Canada","https://www.linkedin.com/in/gvaraich/"],
+      ["Benjamin Martindale","Donkey","Canada","https://www.linkedin.com/in/benjamin-martindale/"],
+      ["Rui Wang","EdotEnv","Switzerland","https://www.linkedin.com/in/rui-wang-456032198/"],
+      ["Michael Zhang","EdotEnv","Switzerland","https://www.linkedin.com/in/michael-zhang-845204232/"],
+      ["David Khachaturov","Egoist Machines","United Kingdom","https://www.linkedin.com/in/david-g-khachaturov/"],
+      ["Sid Unnithan","Evergrove","Canada","https://www.linkedin.com/in/siddhanthunnithan"],
+      ["Ahmed Aly","Fabraix","United Kingdom","https://www.linkedin.com/in/ahmed-a-657264b4/"],
+      ["Ibrahim Abdu","Fabraix","United Kingdom","https://www.linkedin.com/in/i-a-7352b7137/"],
+      ["Nikos Dritsakos","Glen","Canada","https://www.linkedin.com/in/nikos-dritsakos/"],
+      ["Safi Shamsi","Graphify Labs","India","https://www.linkedin.com/in/safi-shamsi/"],
+      ["Steven Xu","Greypoint Industries","Canada","https://www.linkedin.com/in/sxu22/"],
+      ["Anis Mihrshahi","Gutgutgoose","Australia","https://www.linkedin.com/in/anis-mihrshahi-2a342a336/"],
+      ["Alessandro Fiume","IMPACT Drones","France","https://www.linkedin.com/in/alessandro-fiume45/"],
+      ["Jasper Lortije","IMPACT Drones","Netherlands","https://www.linkedin.com/in/jasper-l/"],
+      ["Tien Chu","LATO","Poland","https://www.linkedin.com/in/chutien/"],
+      ["Tymek Staniszewski","LATO","Poland","https://www.linkedin.com/in/tymeks/"],
+      ["Barnaby Malet","machine0","United Kingdom","https://www.linkedin.com/in/barnabymalet/"],
+      ["Zaky Hassan","Molagri","Canada","https://www.linkedin.com/in/zaky-hassan/"],
+      ["Min Jin","Molagri","Canada","https://www.linkedin.com/in/min-jin-ca/"],
+      ["Dorsa Rohani","Mosaic","Canada","https://www.linkedin.com/in/dorsarohani/"],
+      ["Vatan Aksoy Tezer","Neuromorphic","Turkey","https://www.linkedin.com/in/vatanaksoytezer/"],
+      ["Cem Toker","Neuromorphic","United Kingdom","https://www.linkedin.com/in/cem-seref-toker"],
+      ["Shreshth Sharma","Olam Labs","Canada","https://www.linkedin.com/in/shreshth-sharma-950826247/"],
+      ["Thomas Aubry","Ooak Data","France","https://www.linkedin.com/in/thomaub"],
+      ["Ojas Kandhare","OpenTrade","India","https://www.linkedin.com/in/ojas-kandhare-74b349212/"],
+      ["Ethan Phillips","Orvixo","United Kingdom","https://www.linkedin.com/in/ethan-phillips2000/"],
+      ["Tony Xavier","Pluto","India","https://linkedin.com/in/tony-xavier"],
+      ["Mojmir Horvath","Poth Labs","Austria","https://www.linkedin.com/in/mojmir-horvath/"],
+      ["Ryan Hu","Qlo","Taiwan","https://www.linkedin.com/in/chenshuohu/"],
+      ["Lewis Blackwood","Rex","United Kingdom","https://www.linkedin.com/in/lewisblackwood/"],
+      ["Merlin Kafka","Rex","United Kingdom","https://www.linkedin.com/in/merlinkafka/"],
+      ["Louis Beaumont","screenpipe","France","https://www.linkedin.com/in/louis030195/"],
+      ["Beknazar Abdikamalov","Speko","Uzbekistan","https://www.linkedin.com/in/abdik/"],
+      ["Berat Celik","Stoa","Canada","https://linkedin.com/in/beratcelik1"],
+      ["Kaan Yigit","Stoa","Turkey","https://www.linkedin.com/in/kaan-yigit/"],
+      ["Raj Jagiasi","Stratum Industries","United Kingdom","https://www.linkedin.com/in/raj-jagiasi/"],
+      ["Vihaan Jagiasi","Stratum Industries","Canada","https://www.linkedin.com/in/vihaanjagiasi/"],
+      ["Hamze Al-Zamkan","Tenor","Germany","https://www.linkedin.com/in/hamze-al-zamkan/"],
+      ["Amgad Al-Zamkan","Tenor","Germany","https://www.linkedin.com/in/amgad-al-zamkan/"],
+      ["Marcus Lima","Torus","United Kingdom","https://www.linkedin.com/in/marcus-lima-144974101/"],
+      ["Ilia Bolgov","Touchmark","United Kingdom","https://www.linkedin.com/in/ilia-bolgov-8683b0254"],
+      ["Roman Yanushevskyi","Touchmark","Singapore","https://www.linkedin.com/in/roman-yanushevskyi/"],
+      ["Junaid Mahmood","Trident","Canada","https://www.linkedin.com/in/junaidmahmood-/"],
+      ["Matthew Chow","Trope","Canada","https://www.linkedin.com/in/mdchow/"],
+      ["Victor Vannara","Trope","Canada","https://www.linkedin.com/in/victor-vannara/"],
+      ["Edin Citaku","Veltha","Germany","https://www.linkedin.com/in/edin-citaku-564000127"],
+      ["Roland Jaloszynski","Veltha","Poland","https://www.linkedin.com/in/roland-jal"],
+      ["Alex Tung","Whitespace","United Kingdom","https://www.linkedin.com/in/alexyctung/"],
+      ["Leon Yao","Whitespace","United Kingdom","https://www.linkedin.com/in/linghong-yao/"],
+      ["Abraham Heifets","WonderTx","Canada","https://www.linkedin.com/in/abrahamheifets/"],
+      ["Axel Andersson Lingbert","Zaplar","Sweden","https://www.linkedin.com/in/axel-andersson-lingbert-0332b2322"],
+      ["Oscar Karlstromer","Zaplar","Sweden","https://www.linkedin.com/in/oscarkarlstromer/"],
+      ["Jon Milles","Zaplar","Sweden","https://www.linkedin.com/in/jon-milles"],
+      ["Douglas Solberg","Zaplar","Sweden","https://www.linkedin.com/in/douglas-solberg/"]
+    ];
+    return raw.map(function(r){
+      return {
+        id:uid(), name:r[0], company:r[1], country:r[2], linkedin:r[3],
+        status:'to_connect', notes:'',
+        dateAdded: todayStr(), dateStatusChanged: todayStr()
+      };
+    });
+  }
+
   var SUPABASE_URL = 'https://uctyauftutvqntlkneyj.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_XuZ2kJuxinpiBKznGZvezw_o6A-snTK';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -435,6 +639,44 @@
         })
         .subscribe();
     }catch(e){ console.error('Realtime subscribe failed', e); }
+  }
+
+  async function loadConnectionsData(){
+    try{
+      var res = await sb.from('daivik_connections').select('data').eq('id', 1).single();
+      if(res.error) throw res.error;
+      connections = (res.data && res.data.data && res.data.data.length) ? res.data.data : null;
+      if(!connections){
+        connections = connectionSeedData();
+        await saveConnectionsData();
+      }
+    }catch(e){
+      console.error('Could not reach Supabase for connections, using local fallback', e);
+      connections = connectionSeedData();
+    }
+    if(currentMode==='connections') render();
+    subscribeConnectionsRealtime();
+  }
+
+  async function saveConnectionsData(){
+    try{
+      var res = await sb.from('daivik_connections').update({ data: connections }).eq('id', 1);
+      if(res.error) throw res.error;
+    }catch(e){ console.error('Connections save failed', e); }
+  }
+
+  function subscribeConnectionsRealtime(){
+    try{
+      sb.channel('daivik_connections_changes')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'daivik_connections', filter: 'id=eq.1' }, function(payload){
+          if(payload && payload.new && payload.new.data){
+            connModal = null;
+            connections = payload.new.data;
+            if(currentMode==='connections') render();
+          }
+        })
+        .subscribe();
+    }catch(e){ console.error('Connections realtime subscribe failed', e); }
   }
 
   function esc(s){
@@ -591,14 +833,22 @@
     return Object.keys(set);
   }
 
-  function render(){
-    var app = document.getElementById('app');
+  function renderModeSwitcher(){
+    return (
+      '<div class="mode-switch">'+
+        '<button class="mode-btn'+(currentMode==='guests'?' active':'')+'" onclick="PL.switchMode(\'guests\')">Podcast Guests</button>'+
+        '<button class="mode-btn'+(currentMode==='connections'?' active':'')+'" onclick="PL.switchMode(\'connections\')">Daily Connections (GTM)</button>'+
+      '</div>'
+    );
+  }
+
+  function renderGuestsView(){
     var regions = uniqueRegions();
     var regionOptions = '<option value="all">All regions</option>' + regions.map(function(r){
       return '<option value="'+esc(r)+'"'+(filters.region===r?' selected':'')+'>'+esc(r)+'</option>';
     }).join('');
 
-    app.innerHTML = (
+    return (
       '<div class="topbar">'+
         '<div>'+
           '<div class="eyebrow">Building Blocks Podcast</div>'+
@@ -634,10 +884,241 @@
 
       '<div class="footer-note">Synced live — anyone with this link sees the same up-to-date pipeline automatically. Export CSV is still there anytime you want an offline backup.</div>'
     );
+  }
+
+  function dailySentCount(){
+    var today = todayStr();
+    return connections.filter(function(c){ return c.dateSent === today; }).length;
+  }
+
+  function renderDailyCounter(){
+    var count = dailySentCount();
+    var pct = Math.min(100, Math.round((count/30)*100));
+    var overCap = count > 30;
+    return (
+      '<div class="daily-card">'+
+        '<div class="daily-left">'+
+          '<div class="daily-title">Today\'s connection requests</div>'+
+          '<div class="daily-sub">Target: 20\u201330/day to keep Daivik\'s account safe from LinkedIn rate limits.</div>'+
+        '</div>'+
+        '<div class="daily-count">'+
+          '<div class="n '+(overCap?'over':'ok')+'">'+count+'</div>'+
+          '<div class="lbl">sent today</div>'+
+          '<div class="daily-bar"><div class="daily-bar-fill'+(overCap?' over':'')+'" style="width:'+pct+'%"></div></div>'+
+        '</div>'+
+      '</div>'
+    );
+  }
+
+  function filteredConnections(){
+    return connections.filter(function(c){
+      if(connFilters.country!=='all' && c.country!==connFilters.country) return false;
+      if(connFilters.q){
+        var q = connFilters.q.toLowerCase();
+        if(!(c.name.toLowerCase().indexOf(q)>-1 || (c.company||'').toLowerCase().indexOf(q)>-1)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderConnCard(c){
+    var linkedinBtn = c.linkedin
+      ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.openConnLinkedin(\''+c.id+'\')">🔗 LinkedIn</button>'
+      : '<span class="mini-btn" style="opacity:.4;cursor:default;">No LinkedIn</span>';
+    var sentBtn = c.status==='to_connect' ? '<button class="mini-btn accent" onclick="event.stopPropagation(); PL.markConnSent(\''+c.id+'\')">Sent →</button>' : '';
+    var acceptBtn = c.status==='sent' ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.setConnStatus(\''+c.id+'\',\'accepted\')">Accepted</button>' : '';
+    var notAcceptBtn = c.status==='sent' ? '<button class="mini-btn accent-clay" onclick="event.stopPropagation(); PL.setConnStatus(\''+c.id+'\',\'not_accepted\')">Not accepted</button>' : '';
+    return (
+      '<div class="conn-card" data-id="'+c.id+'" onclick="PL.openConnDetail(\''+c.id+'\')">'+
+        '<div class="cname">'+esc(c.name)+'</div>'+
+        '<div class="ccompany">'+esc(c.company||'—')+'</div>'+
+        '<div class="ccountry">'+esc(c.country||'')+'</div>'+
+        '<div class="cactions">'+linkedinBtn+sentBtn+acceptBtn+notAcceptBtn+'</div>'+
+      '</div>'
+    );
+  }
+
+  function renderConnBoard(){
+    var fc = filteredConnections();
+    var colsHtml = '';
+    CONN_STAGES.forEach(function(st){
+      var items = fc.filter(function(c){return c.status===st.key;});
+      var cardsHtml = items.length ? items.map(renderConnCard).join('') : '<div class="empty-col">No one here</div>';
+      var isClosed = st.key==='not_accepted';
+      colsHtml += (
+        '<div class="conn-col'+(isClosed?' closed':'')+'">'+
+          '<div class="col-head"><span class="name">'+st.label+'</span><span class="count mono">'+items.length+'</span></div>'+
+          '<div class="cards">'+cardsHtml+'</div>'+
+        '</div>'
+      );
+    });
+    return '<div class="conn-board">'+colsHtml+'</div>';
+  }
+
+  function uniqueCountries(){
+    var set = {};
+    connections.forEach(function(c){ if(c.country) set[c.country]=true; });
+    return Object.keys(set).sort();
+  }
+
+  function renderConnectionsView(){
+    var countries = uniqueCountries();
+    var countryOptions = '<option value="all">All countries</option>' + countries.map(function(c){
+      return '<option value="'+esc(c)+'"'+(connFilters.country===c?' selected':'')+'>'+esc(c)+'</option>';
+    }).join('');
+
+    return (
+      '<div class="topbar">'+
+        '<div>'+
+          '<div class="eyebrow">Daivik · GTM (Paulina)</div>'+
+          '<h1>YC S26 Connections</h1>'+
+          '<div class="sub">International founders — connect only, no messages. Separate from the podcast pipeline.</div>'+
+        '</div>'+
+        '<div class="topbar-actions">'+
+          '<input type="file" id="import-conn-csv-input" accept=".csv" style="display:none" onchange="PL.handleImportConnFile(this)">'+
+          '<button class="btn btn-ghost" onclick="document.getElementById(\'import-conn-csv-input\').click()">Import CSV</button>'+
+          '<button class="btn btn-ghost" onclick="PL.exportConnCSV()">Export CSV</button>'+
+          '<button class="btn btn-primary" onclick="PL.openAddConn()">+ Add connection</button>'+
+        '</div>'+
+      '</div>'+
+
+      renderDailyCounter()+
+
+      '<div class="toolbar">'+
+        '<div class="filters">'+
+          '<input type="text" placeholder="Search name or company…" value="'+esc(connFilters.q)+'" oninput="PL.setConnFilter(\'q\', this.value)">'+
+          '<select onchange="PL.setConnFilter(\'country\', this.value)">'+countryOptions+'</select>'+
+        '</div>'+
+      '</div>'+
+
+      renderConnBoard()+
+
+      '<div class="footer-note">Synced live with Daivik\'s account. No outreach messages are sent from this list — connection requests only, per Paulina\'s instructions.</div>'
+    );
+  }
+
+  function renderConnModal(){
+    var existing = document.getElementById('modal-root');
+    if(existing) existing.remove();
+    var isAdd = connModal === 'add';
+    var c = isAdd ? {name:'',company:'',country:'',linkedin:'',status:'to_connect',notes:''} : connModal;
+
+    var stageOptions = CONN_STAGES.map(function(s){
+      return '<option value="'+s.key+'"'+(c.status===s.key?' selected':'')+'>'+s.label+'</option>';
+    }).join('');
+
+    var div = document.createElement('div');
+    div.id = 'modal-root';
+    div.className = 'modal-bg';
+    div.onclick = function(e){ if(e.target===div){ PL.closeConnModal(); } };
+    div.innerHTML = (
+      '<div class="modal">'+
+        '<button class="close-x" onclick="PL.closeConnModal()">×</button>'+
+        '<h3>'+(isAdd?'Add connection':'Edit connection')+'</h3>'+
+        '<div class="field"><label>Name</label><input id="cf-name" value="'+esc(c.name)+'" placeholder="Full name"></div>'+
+        '<div class="row2">'+
+          '<div class="field"><label>Company</label><input id="cf-company" value="'+esc(c.company)+'" placeholder="Company"></div>'+
+          '<div class="field"><label>Country</label><input id="cf-country" value="'+esc(c.country)+'" placeholder="Country"></div>'+
+        '</div>'+
+        '<div class="field"><label>LinkedIn URL</label><input id="cf-linkedin" value="'+esc(c.linkedin)+'" placeholder="https://linkedin.com/in/…"></div>'+
+        (!isAdd && c.linkedin ? '<div class="field-actions-row"><button class="mini-btn" onclick="PL.openConnLinkedin(\''+c.id+'\')">🔗 Open LinkedIn profile</button></div>' : '')+
+        '<div class="field"><label>Status</label><select id="cf-status">'+stageOptions+'</select></div>'+
+        '<div class="field"><label>Notes</label><textarea id="cf-notes" placeholder="optional">'+esc(c.notes)+'</textarea></div>'+
+        '<div class="modal-actions">'+
+          (isAdd ? '<span></span>' : '<button class="btn btn-danger-ghost btn-sm" onclick="PL.deleteConn(\''+c.id+'\')">Delete</button>')+
+          '<div class="right">'+
+            '<button class="btn btn-ghost btn-sm" onclick="PL.closeConnModal()">Cancel</button>'+
+            '<button class="btn btn-primary btn-sm" onclick="PL.saveConn(\''+(isAdd?'':c.id)+'\')">Save</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    );
+    document.body.appendChild(div);
+  }
+
+  function isDuplicateConn(candidate){
+    var candLi = normalizeUrl(candidate.linkedin);
+    var candName = normalizeText(candidate.name);
+    var candCompany = normalizeText(candidate.company);
+    return connections.some(function(c){
+      var cLi = normalizeUrl(c.linkedin);
+      if(candLi && cLi && candLi===cLi) return true;
+      if(candName && candName===normalizeText(c.name) && candCompany===normalizeText(c.company)) return true;
+      return false;
+    });
+  }
+
+  function exportConnCSV(){
+    var headers = ['Name','Company','Country','Status','LinkedIn','Notes','Date Added','Date Sent'];
+    var lines = [headers.join(',')];
+    connections.forEach(function(c){
+      var stageLabel = CONN_STAGES.find(function(s){return s.key===c.status;});
+      var row = [c.name,c.company,c.country,(stageLabel?stageLabel.label:c.status),c.linkedin,c.notes,c.dateAdded,c.dateSent||'']
+        .map(function(v){ v = (v||'').toString().replace(/"/g,'""'); return '"'+v+'"'; });
+      lines.push(row.join(','));
+    });
+    var blob = new Blob([lines.join('\n')], {type:'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'daivik-connections-'+todayStr()+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importConnCSVFile(file){
+    var reader = new FileReader();
+    reader.onload = async function(e){
+      try{
+        var rows = parseCSV(String(e.target.result||''));
+        if(!rows.length){ alert('That file looks empty.'); return; }
+        var header = rows[0].map(function(h){return h.trim().toLowerCase();});
+        var idxName = header.indexOf('name');
+        var idxFirst = findCol(header, ['first name','firstname']);
+        var idxLast = findCol(header, ['last name','lastname']);
+        var idxCompany = findCol(header, ['company','company name']);
+        var idxCountry = findCol(header, ['country','country_of_origin','country of origin']);
+        var idxLinkedin = findCol(header, ['linkedin','person linkedin url','linkedin url']);
+        if(idxName===-1 && idxFirst===-1){ alert('Could not find a Name column in this CSV.'); return; }
+        var added = 0, skipped = 0;
+        for(var r=1;r<rows.length;r++){
+          var row = rows[r];
+          if(!row) continue;
+          var name = idxName>-1 ? (row[idxName]||'').trim()
+            : [(idxFirst>-1?row[idxFirst]:'')||'', (idxLast>-1?row[idxLast]:'')||''].map(function(s){return s.trim();}).filter(Boolean).join(' ');
+          if(!name) continue;
+          var candidate = {
+            name:name,
+            company: idxCompany>-1 ? (row[idxCompany]||'').trim() : '',
+            country: idxCountry>-1 ? (row[idxCountry]||'').trim() : '',
+            linkedin: idxLinkedin>-1 ? (row[idxLinkedin]||'').trim() : ''
+          };
+          if(isDuplicateConn(candidate)){ skipped++; continue; }
+          connections.unshift({
+            id: uid(), name:candidate.name, company:candidate.company, country:candidate.country,
+            linkedin:candidate.linkedin, status:'to_connect', notes:'',
+            dateAdded: todayStr(), dateStatusChanged: todayStr(), dateSent: null
+          });
+          added++;
+        }
+        await saveConnectionsData();
+        render();
+        alert('Imported '+added+' new connections.'+(skipped?(' Skipped '+skipped+' already in the list.'):''));
+      }catch(err){
+        alert('Could not read that CSV.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+
+  function render(){
+    var app = document.getElementById('app');
+    app.innerHTML = renderModeSwitcher() + (currentMode==='connections' ? renderConnectionsView() : renderGuestsView());
 
     var existingModal = document.getElementById('modal-root');
     if(existingModal) existingModal.remove();
     if(openModal) renderModal();
+    if(connModal) renderConnModal();
   }
 
   function renderModal(){
@@ -923,10 +1404,88 @@
       var file = inputEl.files && inputEl.files[0];
       if(file) importCSVFile(file);
       inputEl.value = '';
+    },
+
+    switchMode:function(mode){
+      currentMode = mode;
+      openModal = null;
+      connModal = null;
+      render();
+    },
+    setConnFilter:function(key,val){ connFilters[key]=val; render(); },
+    openAddConn:function(){ connModal='add'; render(); },
+    openConnDetail:function(id){ connModal = connections.find(function(c){return c.id===id;}); render(); },
+    closeConnModal:function(){ connModal=null; render(); },
+    openConnLinkedin:function(id){
+      var c = connections.find(function(cc){return cc.id===id;});
+      if(c && c.linkedin) window.open(c.linkedin, '_blank', 'noopener');
+    },
+    markConnSent:async function(id){
+      var c = connections.find(function(cc){return cc.id===id;});
+      if(!c) return;
+      c.status = 'sent';
+      c.dateStatusChanged = todayStr();
+      if(!c.dateSent) c.dateSent = todayStr();
+      await saveConnectionsData();
+      render();
+    },
+    setConnStatus:async function(id, newStatus){
+      var c = connections.find(function(cc){return cc.id===id;});
+      if(!c) return;
+      c.status = newStatus;
+      c.dateStatusChanged = todayStr();
+      await saveConnectionsData();
+      render();
+    },
+    saveConn:async function(id){
+      var name = document.getElementById('cf-name').value.trim();
+      if(!name){ document.getElementById('cf-name').focus(); return; }
+      var data = {
+        name:name,
+        company:document.getElementById('cf-company').value.trim(),
+        country:document.getElementById('cf-country').value.trim(),
+        linkedin:document.getElementById('cf-linkedin').value.trim(),
+        status:document.getElementById('cf-status').value,
+        notes:document.getElementById('cf-notes').value.trim()
+      };
+      if(id){
+        var c = connections.find(function(cc){return cc.id===id;});
+        var statusChanged = c.status !== data.status;
+        var wasToConnect = c.status === 'to_connect';
+        Object.assign(c, data);
+        if(statusChanged) c.dateStatusChanged = todayStr();
+        if(statusChanged && wasToConnect && data.status==='sent' && !c.dateSent) c.dateSent = todayStr();
+      } else {
+        if(isDuplicateConn(data)){
+          alert('This person is already in the connections list. Not adding a duplicate.');
+          return;
+        }
+        data.id = uid();
+        data.dateAdded = todayStr();
+        data.dateStatusChanged = todayStr();
+        data.dateSent = (data.status==='sent') ? todayStr() : null;
+        connections.unshift(data);
+      }
+      connModal = null;
+      await saveConnectionsData();
+      render();
+    },
+    deleteConn:async function(id){
+      connections = connections.filter(function(c){return c.id!==id;});
+      connModal = null;
+      await saveConnectionsData();
+      render();
+    },
+    exportConnCSV:exportConnCSV,
+    handleImportConnFile:function(inputEl){
+      var file = inputEl.files && inputEl.files[0];
+      if(file) importConnCSVFile(file);
+      inputEl.value = '';
     }
   };
 
   loadData();
+  loadConnectionsData();
 })();
 </script>
 </body>
