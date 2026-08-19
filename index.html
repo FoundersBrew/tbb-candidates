@@ -250,6 +250,11 @@
   .conn-card .ccompany{font-size:12px;color:var(--text-dim);margin-top:1px;}
   .conn-card .ccountry{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;}
   .conn-card .cactions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .conn-card .cdate{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);margin-top:6px;}
+  .conn-card .cdate.stale{color:var(--clay);}
+  .conn-stats-strip{display:flex;gap:22px;font-size:12px;color:var(--text-dim);margin:-8px 0 22px;padding:0 4px;flex-wrap:wrap;}
+  .conn-stats-strip b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
+  .conn-stats-strip .asof{color:var(--text-faint);font-style:italic;margin-left:auto;}
 
   /* ---------- Modal ---------- */
   .modal-bg{
@@ -320,6 +325,12 @@
   var people = [];
   var filters = { source:'all', region:'all', q:'' };
   var openModal = null; // 'add' | person object | null
+  var lastSavedAt = null;
+
+  function formatLastSaved(){
+    if(!lastSavedAt) return 'not yet saved this session';
+    return 'last saved ' + lastSavedAt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
 
   var currentMode = 'guests'; // 'guests' | 'connections'
   var connections = [];
@@ -330,7 +341,8 @@
     { key:'to_connect', label:'To Connect' },
     { key:'sent', label:'Sent' },
     { key:'accepted', label:'Accepted' },
-    { key:'not_accepted', label:'Not Accepted' }
+    { key:'not_accepted', label:'Not Accepted' },
+    { key:'already_connected', label:'Already Connected' }
   ];
 
   function uid(){ return 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
@@ -624,6 +636,8 @@
     try{
       var res = await sb.from('pipeline_data').update({ data: people }).eq('id', 1);
       if(res.error) throw res.error;
+      lastSavedAt = new Date();
+      sb.from('pipeline_data_history').insert({ data: people }).then(function(){}).catch(function(e){ console.error('Backup snapshot failed', e); });
     }catch(e){ console.error('Storage save failed', e); }
   }
 
@@ -662,6 +676,8 @@
     try{
       var res = await sb.from('daivik_connections').update({ data: connections }).eq('id', 1);
       if(res.error) throw res.error;
+      lastSavedAt = new Date();
+      sb.from('daivik_connections_history').insert({ data: connections }).then(function(){}).catch(function(e){ console.error('Backup snapshot failed', e); });
     }catch(e){ console.error('Connections save failed', e); }
   }
 
@@ -853,7 +869,7 @@
         '<div>'+
           '<div class="eyebrow">Building Blocks Podcast</div>'+
           '<h1>Outreach Dispatch</h1>'+
-          '<div class="sub">Guest sourcing pipeline · updated live as you work</div>'+
+          '<div class="sub">Guest sourcing pipeline · updated live as you work · '+formatLastSaved()+'</div>'+
         '</div>'+
         '<div class="topbar-actions">'+
           '<input type="file" id="import-csv-input" accept=".csv" style="display:none" onchange="PL.handleImportFile(this)">'+
@@ -926,14 +942,28 @@
       ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.openConnLinkedin(\''+c.id+'\')">🔗 LinkedIn</button>'
       : '<span class="mini-btn" style="opacity:.4;cursor:default;">No LinkedIn</span>';
     var sentBtn = c.status==='to_connect' ? '<button class="mini-btn accent" onclick="event.stopPropagation(); PL.markConnSent(\''+c.id+'\')">Sent →</button>' : '';
+    var alreadyBtn = c.status==='to_connect' ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.setConnStatus(\''+c.id+'\',\'already_connected\')">Already connected</button>' : '';
     var acceptBtn = c.status==='sent' ? '<button class="mini-btn" onclick="event.stopPropagation(); PL.setConnStatus(\''+c.id+'\',\'accepted\')">Accepted</button>' : '';
     var notAcceptBtn = c.status==='sent' ? '<button class="mini-btn accent-clay" onclick="event.stopPropagation(); PL.setConnStatus(\''+c.id+'\',\'not_accepted\')">Not accepted</button>' : '';
+
+    var dateLabel = '';
+    if(c.dateSent){
+      if(c.status==='sent'){
+        var days = daysSince(c.dateSent);
+        var stale = days>=7;
+        dateLabel = '<div class="cdate'+(stale?' stale':'')+'">Sent '+c.dateSent+' · '+days+'d ago'+(stale?' — reconsider retracting':'')+'</div>';
+      } else {
+        dateLabel = '<div class="cdate">Sent '+c.dateSent+'</div>';
+      }
+    }
+
     return (
       '<div class="conn-card" data-id="'+c.id+'" onclick="PL.openConnDetail(\''+c.id+'\')">'+
         '<div class="cname">'+esc(c.name)+'</div>'+
         '<div class="ccompany">'+esc(c.company||'—')+'</div>'+
         '<div class="ccountry">'+esc(c.country||'')+'</div>'+
-        '<div class="cactions">'+linkedinBtn+sentBtn+acceptBtn+notAcceptBtn+'</div>'+
+        dateLabel+
+        '<div class="cactions">'+linkedinBtn+sentBtn+alreadyBtn+acceptBtn+notAcceptBtn+'</div>'+
       '</div>'
     );
   }
@@ -961,6 +991,26 @@
     return Object.keys(set).sort();
   }
 
+  function renderConnStatsStrip(){
+    var accepted = connections.filter(function(c){return c.status==='accepted';}).length;
+    var notAccepted = connections.filter(function(c){return c.status==='not_accepted';}).length;
+    var sentPending = connections.filter(function(c){return c.status==='sent';}).length;
+    var alreadyConnected = connections.filter(function(c){return c.status==='already_connected';}).length;
+    var resolved = accepted + notAccepted;
+    var rate = resolved>0 ? Math.round((accepted/resolved)*100) : null;
+    var now = new Date();
+    var asOf = now.toLocaleDateString([], {month:'short', day:'numeric'}) + ', ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    return (
+      '<div class="conn-stats-strip">'+
+        '<span>Total sent: <b>'+(accepted+notAccepted+sentPending)+'</b></span>'+
+        '<span>Pending response: <b>'+sentPending+'</b></span>'+
+        '<span>Acceptance rate: <b>'+(rate===null?'—':rate+'%')+'</b></span>'+
+        '<span>Already connected: <b>'+alreadyConnected+'</b></span>'+
+        '<span class="asof">as of '+asOf+'</span>'+
+      '</div>'
+    );
+  }
+
   function renderConnectionsView(){
     var countries = uniqueCountries();
     var countryOptions = '<option value="all">All countries</option>' + countries.map(function(c){
@@ -972,7 +1022,7 @@
         '<div>'+
           '<div class="eyebrow">Daivik · GTM (Paulina)</div>'+
           '<h1>YC S26 Connections</h1>'+
-          '<div class="sub">International founders — connect only, no messages. Separate from the podcast pipeline.</div>'+
+          '<div class="sub">International founders — connect only, no messages. Separate from the podcast pipeline. · '+formatLastSaved()+'</div>'+
         '</div>'+
         '<div class="topbar-actions">'+
           '<input type="file" id="import-conn-csv-input" accept=".csv" style="display:none" onchange="PL.handleImportConnFile(this)">'+
@@ -983,6 +1033,7 @@
       '</div>'+
 
       renderDailyCounter()+
+      renderConnStatsStrip()+
 
       '<div class="toolbar">'+
         '<div class="filters">'+
