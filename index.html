@@ -233,6 +233,26 @@
   .acct-btn.active{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-line);}
   .acct-btn:hover{color:var(--text);}
 
+  /* ---------- Candidate Monitoring ---------- */
+  .monitor-instructions{
+    background:var(--surface);border:1px solid var(--hair);border-radius:12px;
+    padding:16px 20px;margin-bottom:18px;font-size:13px;color:var(--text-dim);line-height:1.6;
+  }
+  .monitor-instructions p{margin:0 0 8px;}
+  .monitor-instructions ol{margin:0 0 8px;padding-left:20px;}
+  .monitor-instructions li{margin-bottom:4px;}
+  .monitor-instructions b{color:var(--text);}
+  .monitor-note{color:var(--text-faint);font-size:12px;font-style:italic;margin-top:10px;}
+  .monitor-count{font-size:12.5px;color:var(--text-dim);margin-bottom:14px;}
+  .monitor-list{display:flex;flex-direction:column;gap:10px;}
+  .monitor-card{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:14px 18px;}
+  .monitor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .monitor-name{font-size:14.5px;font-weight:600;color:var(--text);}
+  .monitor-meta{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .monitor-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--hair-soft);flex-wrap:wrap;gap:10px;}
+  .monitor-days{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--clay);}
+  .monitor-actions{display:flex;gap:8px;}
+
   /* ---------- Connections (GTM) view ---------- */
   .daily-card{
     background:linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
@@ -466,158 +486,136 @@
   }
 
   function connectionSeedData(){
-    // [name, company, country, linkedin] — international YC S26 founders, from Paulina's sheet
+    // [name, company, country, linkedin] — YC Fall 26 (F26) founders, from Paulina's sheet, compiled 17 Sep 2026
     var raw = [
-      ["Ksenia Lesko","Caution","Russia","https://www.linkedin.com/in/ksenialesko/"],
-      ["Ramtin Shahzanian","Magma","Iran","https://www.linkedin.com/in/ramtin-shahzanian/"],
-      ["Emile Germonpre","Atomarine","Belgium","https://www.linkedin.com/in/emile-germonpr%C3%A9-766045245/"],
-      ["Dimitris Koutentakis","Atomarine","Greece","https://www.linkedin.com/in/dkoutentakis/"],
-      ["Philip Moniaga","Billow AI Labs","Indonesia","https://www.linkedin.com/in/philipmoniaga/"],
-      ["Anish Mariathasan","Osseus","United Kingdom","https://www.linkedin.com/in/anishmariathasan/"],
-      ["Ayush Patel","Osseus","United Kingdom","https://www.linkedin.com/in/ayush-patel4/"],
-      ["Jay Chooi","Robocurve","Malaysia","https://www.linkedin.com/in/jeqcho/"],
-      ["Karan Brar","hiloop","Canada","https://www.linkedin.com/in/brarkaran"],
-      ["Robin Lee","Dawn Industries","South Korea","https://www.linkedin.com/in/robinlee02/"],
-      ["Najmuzzaman (Nazz) Mohammad","Nex","India","https://linkedin.com/in/najmuzzaman"],
-      ["Guy Ben Aharon","OneCLI","Israel","https://www.linkedin.com/in/guy-ben-aharon/"],
-      ["Jonathan Fishner","OneCLI","Israel","https://www.linkedin.com/in/jonathanfishner"],
-      ["Hisham El-Halabi","Vernius Systems, Inc.","Canada","https://www.linkedin.com/in/hisham-el-halabi-001/"],
-      ["Cheng-Wei Hu","Wondering","Taiwan","https://www.linkedin.com/in/cwhu"],
-      ["Angelica Kosasih","Wondering","Indonesia","https://www.linkedin.com/in/angelica-kosasih/"],
-      ["Adam Rida","Tracer","France","https://www.linkedin.com/in/adam-rida-581296142"],
-      ["Campbell Mercer-Butcher","Avoca Systems","New Zealand","https://www.linkedin.com/in/campbell-mercer-butcher"],
-      ["Max Shand","Avoca Systems","Australia","https://www.linkedin.com/in/max-shand-700a3ab5/"],
-      ["Emre Isik","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/emre-i-6a88aa193"],
-      ["Hakan Enes Aksu","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/hakan-enes-aksu/"],
-      ["Ali Eren Aytekin","SpaceFlow Technologies, Inc.","Turkey","https://www.linkedin.com/in/ali-eren-aytekin-6305a41aa/"],
-      ["James Walton","Earendil Robotics","United Kingdom","https://www.linkedin.com/in/james-walton-79b35339a/"],
-      ["Kingston Kuan","Hebbian Robotics","Singapore","https://www.linkedin.com/in/kingston-kuan/"],
-      ["Brandon Ong","Hebbian Robotics","Singapore","https://linkedin.com/in/ongjjbrandon"],
-      ["Conrad Froyland Moe","PRINCEPS","Norway","https://www.linkedin.com/in/conrad-fr%C3%B8yland-moe-7950b1229/"],
-      ["Anya Trofimova","PRINCEPS","United Kingdom","https://www.linkedin.com/in/anyatrofimova"],
-      ["Govind Kavaturi","Dock","India","https://www.linkedin.com/in/govindkavaturi/"],
-      ["Dan Danay","Verdict Machine","Israel","https://www.linkedin.com/in/dandanay/"],
-      ["Karan Raina","HyperProbe","India","https://www.linkedin.com/in/karanraina/"],
-      ["Shailendra Singh","HyperProbe","India","https://www.linkedin.com/in/shailendra-singh-6540b8b/"],
-      ["Damian Szumski","Skymerse","Poland","https://www.linkedin.com/in/damian-szumski/"],
-      ["Niki Kotecha","Lamb Labs","United Kingdom","https://www.linkedin.com/in/niki-kotecha/"],
-      ["Thomas Lanning","Lamb Labs","United Kingdom","https://www.linkedin.com/in/thomas-lanning/"],
-      ["Ansh Chokshi","Mireye","Canada","https://www.linkedin.com/in/ansh-chokshi/"],
-      ["Sarthak Aggarwal","Decawork","India","https://www.linkedin.com/in/sarthak-agg/"],
-      ["Aman Raj","Decawork","India","https://linkedin.com/in/aman-raj-84636a158"],
-      ["Saman Sayahpour","Axelrod","Austria","https://www.linkedin.com/in/sayahpour/"],
-      ["Adrian Lucas Tariel Stoica","Axelrod","Germany","https://www.linkedin.com/in/stoicaadrian/"],
-      ["Mohit Gupta","Levocred AI","India","https://www.linkedin.com/in/guptamohit2299/"],
-      ["Saksham Gupta","Levocred AI","India","https://www.linkedin.com/in/gupsak"],
-      ["Rohan Seelamsetty","Praxis AI","India","https://www.linkedin.com/in/rohan-s-1186b2214"],
-      ["Melvin Chen","Care GP","China","https://www.linkedin.com/in/melvinchen/"],
-      ["Maryam Jahed","Radley","Canada","https://linkedin.com/in/maryamjahed"],
-      ["Shubham Palriwala","Agnost AI","India","https://www.linkedin.com/in/shubhampalriwala/"],
-      ["Parth Ajmera","Agnost AI","India","https://www.linkedin.com/in/parthajmera/"],
-      ["Karen Serfaty","Agentcard","Argentina","https://www.linkedin.com/in/keyserfaty/"],
-      ["Felipe Abello","Agentcard","Colombia","https://linkedin.com/in/pipe-abello-2512b9195"],
-      ["Johnny Doyle","ProvenMetal","Ireland","https://www.linkedin.com/in/johnny-doyle-69022718a/"],
-      ["Will Carkner","ProvenMetal","Ireland","https://www.linkedin.com/in/will-carkner-518b77228/"],
-      ["Paul Conyngham","Gamgee","Australia","https://www.linkedin.com/in/paustevenlconyngham/"],
-      ["Ray Liao","Inkbox","China","https://www.linkedin.com/in/ruizhi-liao/"],
-      ["Dima Vremenko","Inkbox","Ukraine","https://www.linkedin.com/in/dimavrem/"],
-      ["Anderson Chen","Operon","Taiwan","https://www.linkedin.com/in/anderson-chen-2b6941216/"],
-      ["Dev Mandal","Markov","India","https://www.linkedin.com/in/dev-mandal-iitm/"],
-      ["Harish Ashok","Markov","India","https://www.linkedin.com/in/harish-ashok"],
-      ["Mingi Kwon","Familiar","South Korea","https://www.linkedin.com/in/kwonmingi"],
-      ["Maryanne Alhallak","Lumeria","Syria","https://www.linkedin.com/in/maryanne-alhallak-33b250241"],
-      ["Emil Ares","Marengo","United Kingdom","https://www.linkedin.com/in/emil-ares"],
-      ["Tushar Goyal","Waybill","India","https://www.linkedin.com/in/thetushargoyal/"],
-      ["Rishi Laddha","Waybill","India","https://www.linkedin.com/in/rishiladdha"],
-      ["Riki Karjalainen","Last Accounting Company","Finland","https://www.linkedin.com/in/riki-karjalainen-22a612189"],
-      ["Sami Laakkonen","Last Accounting Company","Finland","https://www.linkedin.com/in/sami-laakkonen/"],
-      ["Veikko Pere","Last Accounting Company","Finland","https://www.linkedin.com/in/veikkopere/"],
-      ["Pietari Virkkunen","Last Accounting Company","Finland","https://www.linkedin.com/in/pietarivirkkunen/"],
-      ["Harper Dammann Smith","Pacific","United Kingdom","https://www.linkedin.com/in/harper-dammann-smith/"],
-      ["Akash Sadashivapeth","Luca IQ","India","https://www.linkedin.com/in/akash-sadashivapeth/"],
-      ["Francisco Serra-Martins","Isengard Industries Inc","Australia","https://www.linkedin.com/in/franciscoserramartins/"],
-      ["James Tennant","Isengard Industries Inc","Australia","https://www.linkedin.com/in/jamesjtennant/"],
-      ["Ahmad Saroya","Moving Atoms","United Kingdom","https://www.linkedin.com/in/ahmad-saroya-a05400237/"],
-      ["Shehryar Saroya","Moving Atoms","United Kingdom","https://linkedin.com/in/shehryar-saroya"],
-      ["Alex Hyungwoo Noh","6thSense","South Korea","https://www.linkedin.com/in/hyungwoonoh/"],
-      ["Shreenabh Agrawal","Aktoria Robotics","India","https://www.linkedin.com/in/shreenabh/"],
-      ["Zander Schweitzer","Alloovium","Australia","https://www.linkedin.com/in/zander-schweitzer-1a0651205"],
-      ["Cielo Nicolosi","Alloovium","Australia","https://www.linkedin.com/in/cielo-nicolosi/"],
-      ["Kushagra Chitkara","Almanac","India","https://www.linkedin.com/in/kushagra-chitkara-2b3226192"],
-      ["Rohan Sharma","Almanac","India","https://www.linkedin.com/in/rohan-sharma-b6275219b/"],
-      ["Divit Sheth","Almanac","India","https://www.linkedin.com/in/divit-sheth/"],
-      ["Karon Pangestu","Arbital","Indonesia","https://www.linkedin.com/in/pangestukaron/"],
-      ["Vincent Owen Toniwan","Arbital","Malaysia","https://www.linkedin.com/in/vincent-owen-202a9821a/"],
-      ["Henrik Brun Fevang","Audun","Norway","https://www.linkedin.com/in/henrik-brun-fevang-8b5b18195"],
-      ["Jacob Hambro","Audun","Norway","https://www.linkedin.com/in/jacob-fagerlund-hambro-70a9b1153/"],
-      ["Magnus Vonen","Audun","Norway","https://www.linkedin.com/in/magnus-nj%C3%B8lstad-vonen-518945208"],
-      ["Mathieu Perez","COACH","France","https://www.linkedin.com/in/mathieu-perez-719019201/"],
-      ["Thomas Perez","COACH","France","https://www.linkedin.com/in/thomas-perez-13011/"],
-      ["Nicolas Sebag","COACH","France","https://www.linkedin.com/in/nicolas-sebag-504747118/"],
-      ["Michael Zhou","Codag","Canada","https://www.linkedin.com/in/mzxzhou/"],
-      ["Chris Liu","DeepReach Inc.","China","https://www.linkedin.com/in/drxcliu"],
-      ["Mazin Al-Ani","Definite","Canada","https://www.linkedin.com/in/mazinalani/"],
-      ["Farhan Ur Rehman","Definite","Canada","https://www.linkedin.com/in/farhan-ur-rehman/"],
-      ["Gurshabd Singh Varaich","Definite","Canada","https://www.linkedin.com/in/gvaraich/"],
-      ["Benjamin Martindale","Donkey","Canada","https://www.linkedin.com/in/benjamin-martindale/"],
-      ["Rui Wang","EdotEnv","Switzerland","https://www.linkedin.com/in/rui-wang-456032198/"],
-      ["Michael Zhang","EdotEnv","Switzerland","https://www.linkedin.com/in/michael-zhang-845204232/"],
-      ["David Khachaturov","Egoist Machines","United Kingdom","https://www.linkedin.com/in/david-g-khachaturov/"],
-      ["Sid Unnithan","Evergrove","Canada","https://www.linkedin.com/in/siddhanthunnithan"],
-      ["Ahmed Aly","Fabraix","United Kingdom","https://www.linkedin.com/in/ahmed-a-657264b4/"],
-      ["Ibrahim Abdu","Fabraix","United Kingdom","https://www.linkedin.com/in/i-a-7352b7137/"],
-      ["Nikos Dritsakos","Glen","Canada","https://www.linkedin.com/in/nikos-dritsakos/"],
-      ["Safi Shamsi","Graphify Labs","India","https://www.linkedin.com/in/safi-shamsi/"],
-      ["Steven Xu","Greypoint Industries","Canada","https://www.linkedin.com/in/sxu22/"],
-      ["Anis Mihrshahi","Gutgutgoose","Australia","https://www.linkedin.com/in/anis-mihrshahi-2a342a336/"],
-      ["Alessandro Fiume","IMPACT Drones","France","https://www.linkedin.com/in/alessandro-fiume45/"],
-      ["Jasper Lortije","IMPACT Drones","Netherlands","https://www.linkedin.com/in/jasper-l/"],
-      ["Tien Chu","LATO","Poland","https://www.linkedin.com/in/chutien/"],
-      ["Tymek Staniszewski","LATO","Poland","https://www.linkedin.com/in/tymeks/"],
-      ["Barnaby Malet","machine0","United Kingdom","https://www.linkedin.com/in/barnabymalet/"],
-      ["Zaky Hassan","Molagri","Canada","https://www.linkedin.com/in/zaky-hassan/"],
-      ["Min Jin","Molagri","Canada","https://www.linkedin.com/in/min-jin-ca/"],
-      ["Dorsa Rohani","Mosaic","Canada","https://www.linkedin.com/in/dorsarohani/"],
-      ["Vatan Aksoy Tezer","Neuromorphic","Turkey","https://www.linkedin.com/in/vatanaksoytezer/"],
-      ["Cem Toker","Neuromorphic","United Kingdom","https://www.linkedin.com/in/cem-seref-toker"],
-      ["Shreshth Sharma","Olam Labs","Canada","https://www.linkedin.com/in/shreshth-sharma-950826247/"],
-      ["Thomas Aubry","Ooak Data","France","https://www.linkedin.com/in/thomaub"],
-      ["Ojas Kandhare","OpenTrade","India","https://www.linkedin.com/in/ojas-kandhare-74b349212/"],
-      ["Ethan Phillips","Orvixo","United Kingdom","https://www.linkedin.com/in/ethan-phillips2000/"],
-      ["Tony Xavier","Pluto","India","https://linkedin.com/in/tony-xavier"],
-      ["Mojmir Horvath","Poth Labs","Austria","https://www.linkedin.com/in/mojmir-horvath/"],
-      ["Ryan Hu","Qlo","Taiwan","https://www.linkedin.com/in/chenshuohu/"],
-      ["Lewis Blackwood","Rex","United Kingdom","https://www.linkedin.com/in/lewisblackwood/"],
-      ["Merlin Kafka","Rex","United Kingdom","https://www.linkedin.com/in/merlinkafka/"],
-      ["Louis Beaumont","screenpipe","France","https://www.linkedin.com/in/louis030195/"],
-      ["Beknazar Abdikamalov","Speko","Uzbekistan","https://www.linkedin.com/in/abdik/"],
-      ["Berat Celik","Stoa","Canada","https://linkedin.com/in/beratcelik1"],
-      ["Kaan Yigit","Stoa","Turkey","https://www.linkedin.com/in/kaan-yigit/"],
-      ["Raj Jagiasi","Stratum Industries","United Kingdom","https://www.linkedin.com/in/raj-jagiasi/"],
-      ["Vihaan Jagiasi","Stratum Industries","Canada","https://www.linkedin.com/in/vihaanjagiasi/"],
-      ["Hamze Al-Zamkan","Tenor","Germany","https://www.linkedin.com/in/hamze-al-zamkan/"],
-      ["Amgad Al-Zamkan","Tenor","Germany","https://www.linkedin.com/in/amgad-al-zamkan/"],
-      ["Marcus Lima","Torus","United Kingdom","https://www.linkedin.com/in/marcus-lima-144974101/"],
-      ["Ilia Bolgov","Touchmark","United Kingdom","https://www.linkedin.com/in/ilia-bolgov-8683b0254"],
-      ["Roman Yanushevskyi","Touchmark","Singapore","https://www.linkedin.com/in/roman-yanushevskyi/"],
-      ["Junaid Mahmood","Trident","Canada","https://www.linkedin.com/in/junaidmahmood-/"],
-      ["Matthew Chow","Trope","Canada","https://www.linkedin.com/in/mdchow/"],
-      ["Victor Vannara","Trope","Canada","https://www.linkedin.com/in/victor-vannara/"],
+      ["Vishnu Krishnaprasad","Agent 37","India","https://www.linkedin.com/in/vishnukrishnaprasad/"],
+      ["Sirsho C","antimattr","India","https://www.linkedin.com/in/sirsho29"],
+      ["Sridipto Ghosh","antimattr","India","https://www.linkedin.com/in/sridiptoghosh/"],
+      ["Naman Gupta","Antropi Robotics","India","https://www.linkedin.com/in/namangupta24/"],
+      ["Shubh Agarwal","Antropi Robotics","India","https://www.linkedin.com/in/shubhagarwal566/"],
+      ["Kush Agarwal","Aviern","United States (Indian heritage)","https://www.linkedin.com/in/kushhansagarwal/"],
+      ["Anicet Nougaret","Boat","France","https://www.linkedin.com/in/anicet-nougaret-b7846b174"],
+      ["Kirill Kadomtsev","Boat","Russia","https://www.linkedin.com/in/luaroncrew/"],
+      ["Mark Nour","Buildbox","United States (Egyptian heritage)","https://www.linkedin.com/in/marknour"],
+      ["Trishala Jain","Buildbox","United States (Indian heritage)","https://www.linkedin.com/in/trishalajain7"],
+      ["Anirudha Kulkarni","ByteAsk","India","https://www.linkedin.com/in/anirudha-kulkarni47/"],
+      ["Pratyush Saini","ByteAsk","India","https://www.linkedin.com/in/pratyush-saini-96108a1a7/"],
+      ["Brison Moorhead","Capveon","United States","https://www.linkedin.com/in/brisonmoorhead"],
+      ["Finn Lancaster","Capveon","United States","https://www.linkedin.com/in/finn-lancaster-a21671219/"],
+      ["Jamie Yau","Collar","Hong Kong / Singapore","https://www.linkedin.com/in/jamiey3u/"],
+      ["Kazel Koh En Yang","Collar","Singapore","https://www.linkedin.com/in/kazel-koh-en-yang-811172186"],
+      ["Tiphaine Venet","Covera","France","https://www.linkedin.com/in/tiphaine-venet/"],
+      ["Kosta Pavlovic","DeepMark","Montenegro","https://www.linkedin.com/in/kosta-pavlovic"],
+      ["Slavko Kovacevic","DeepMark","Montenegro","https://www.linkedin.com/in/slavkokovacevic/"],
+      ["Aziz Hanafi","Degla Inc","Egypt","https://www.linkedin.com/in/aziz-hanafi-496a67164/"],
+      ["Irene Grace Karot Polson","Deploy","India","https://www.linkedin.com/in/irene-grace-karot-polson/"],
+      ["Sahith Reddy Chada","Deploy","India","https://www.linkedin.com/in/sahith-reddy-chada"],
+      ["Antoine Nguyen","Dreamscale Labs","Australia","https://www.linkedin.com/in/antoine-n-633b84200"],
+      ["Chris Yoo","Dreamscale Labs","United States (Korean heritage)","https://www.linkedin.com/in/chris-yoo"],
+      ["Eric Ren","Dreamscale Labs","United States (Chinese heritage)","https://www.linkedin.com/in/e-ren"],
+      ["Kevin Lin","Dreamscale Labs","China","https://www.linkedin.com/in/kevin-lin-760945225"],
+      ["Daniel Yoon","Forward","Australia","https://www.linkedin.com/in/danielyoon2004/"],
+      ["Darryl Luo","Forward","Australia","https://www.linkedin.com/in/darryl-luo-b0496a266/"],
+      ["Riley Janjis","Forward","Australia","https://www.linkedin.com/in/riley-janjis-6aa9b5264"],
+      ["Carl Bager","Frontrunner","Denmark","https://www.linkedin.com/in/carlbager/"],
+      ["Maya Nayyar","Frontrunner","United States (Indian heritage)","https://www.linkedin.com/in/mayanayyar/"],
+      ["Aditya Bommakanti","GodHands","India","https://www.linkedin.com/in/aditya-bommakanti-6b035321a/"],
+      ["Sai Vamshi Batchu","GodHands","India","https://www.linkedin.com/in/sai-vamshi-129256194/"],
+      ["Linus von Ekensteen Lofgren","Halmos Labs","Sweden","https://www.linkedin.com/in/linusvonekensteen/"],
+      ["Mattias Akke","Halmos Labs","Sweden","https://www.linkedin.com/in/mattias-akke-40a83219a"],
+      ["Julian Olschwang","Hemlock","United States","https://www.linkedin.com/in/julian-olschwang"],
+      ["Can Celik","herdr","Turkiye","https://www.linkedin.com/in/ogulcancelik/"],
+      ["Nitish Badu","Hesper AI","India","https://www.linkedin.com/in/nitish-badu-529b28165/"],
+      ["Pankaj Dhariwal","Hesper AI","India","https://www.linkedin.com/in/pankaj-dhariwal/"],
+      ["Joshua Howland","Hickory & Company","United States","https://www.linkedin.com/in/jkhowland"],
+      ["Jashwanth Pedapudi","Hopper","India","https://www.linkedin.com/in/jashwanth12/"],
+      ["Pavan Katta","Hopper","India","https://www.linkedin.com/in/pavankatta1998/"],
+      ["Nick Taranto","Ignition Benefits","United States","https://www.linkedin.com/in/nicktaranto/"],
+      ["Chen Peng","Lambda Robotics","China","https://www.linkedin.com/in/chen-peng-6737681bb"],
+      ["Liam Zhong","Lambda Robotics","China","https://www.linkedin.com/in/ningze-zhong-a62917388/"],
+      ["Yim Ying","Lambda Robotics","China","https://www.linkedin.com/in/qingyun-ying-46558235b"],
+      ["Justin Tang","Lantern AI","Hong Kong","https://www.linkedin.com/in/justin-wang-lap-tang-5523b9175/"],
+      ["Thomas Chan","Lantern AI","Hong Kong","https://www.linkedin.com/in/thomas-chan-7769281a8/"],
+      ["Jason Wang","Lark","Canada","https://www.linkedin.com/in/jasonhy-wang/"],
+      ["Michael Wang","Lark","Canada","https://www.linkedin.com/in/michael-wang-40061923b/"],
+      ["Luke Mainwaring","Lightfield","United States","https://www.linkedin.com/in/luke-mainwaring-850a34203"],
+      ["Luke Wagner","Lightfield","United States","https://www.linkedin.com/in/lukedwagner"],
+      ["Gabriel Noya","Lyon","United States","https://www.linkedin.com/in/gabriel-noya"],
+      ["Aryaman Shrivastava","Maritime","India","https://www.linkedin.com/in/aryshriv"],
+      ["Maria Gorskikh","Maritime","Russia","https://www.linkedin.com/in/mariagorskikh/"],
+      ["Ashten Akemoto","Micora","United States","https://www.linkedin.com/in/ashtenakemoto/"],
+      ["Frederik (Fredy) Mareels","Micora","Belgium","https://www.linkedin.com/in/frederik-mareels"],
+      ["Aryan Singhal","Mirrors","India","https://www.linkedin.com/in/aryan-singhal-ai"],
+      ["Pranav Varshney","Nodus Compute","United States (Indian heritage)","https://www.linkedin.com/in/pvarshh"],
+      ["Viswa Kotra","Nodus Compute","United States (Indian heritage)","https://www.linkedin.com/in/viswa-kotra"],
+      ["Deep Utkarsh","OnePatch","India","https://www.linkedin.com/in/deepanshuu"],
+      ["Shalin Patel","OnePatch","Canada","https://www.linkedin.com/in/shalin1patel/"],
+      ["Hakan Chunton","Orca Aerospace","United States","https://www.linkedin.com/in/hakan-chunton/"],
+      ["Jacob Ososke","Orca Aerospace","United States","https://www.linkedin.com/in/ososke/"],
+      ["Seth Schilbe","ORO AI","Canada","https://www.linkedin.com/in/sethschilbe/"],
+      ["Shardul Bansal","ORO AI","India","https://www.linkedin.com/in/shardul-bansal"],
+      ["Faiz Vadakkumpadath","Papaya","India","https://www.linkedin.com/in/vpfaiz"],
+      ["Macy Mody","Papaya","United States","https://www.linkedin.com/in/macy-berg/"],
+      ["Niyaz Puzhikkunnath","Papaya","India","https://www.linkedin.com/in/niyazpk"],
+      ["Kshitij Dixit","Perit.AI","India","https://www.linkedin.com/in/kshitijdixit/"],
+      ["Poorva Dixit","Perit.AI","India","https://www.linkedin.com/in/poorvadixit/"],
+      ["Elias Reinfeldt","Qokedas","Sweden","https://www.linkedin.com/in/elias-reinfeldt-77a321411"],
+      ["Jesper Johansson","Qokedas","Sweden","https://www.linkedin.com/in/jesper-johansson-783000419/"],
+      ["Wilhelm Hedenskog","Qokedas","Sweden","https://www.linkedin.com/in/wilhelm-hedenskog"],
+      ["Jonathan Li","Quippy","United States (Chinese heritage)","https://www.linkedin.com/in/12lijonathan"],
+      ["Andre Beukers","Redoubt Insurance","Netherlands / South Africa","https://www.linkedin.com/in/andre-beukers/"],
+      ["Jaber Jaber","RightNow","Jordan","https://www.linkedin.com/in/jaber-jaber-b65246234"],
+      ["Osama Jaber","RightNow","Jordan","https://www.linkedin.com/in/osama-jaber-osama2001/"],
+      ["Cody Osborne","Roma","United States","https://www.linkedin.com/in/a-cody-osborne-3845b54/"],
+      ["Jan Senderek","Roma","Germany","https://www.linkedin.com/in/jansenderek/"],
+      ["Tobias Eichenwald","Roma","Germany","https://www.linkedin.com/in/tobias-eichenwald-86a8902a"],
+      ["Aditya Vellanki","Sentient OS","United States (Indian heritage)","https://www.linkedin.com/in/adityahemanth/"],
+      ["Jesai Tarun","Sentient OS","India","https://www.linkedin.com/in/jesai-tarun-37004725a/"],
+      ["David Fang","Shepherd Robotics","China","https://www.linkedin.com/in/da-fang-8273b7116/"],
+      ["Feifei Duan","Shepherd Robotics","China","https://www.linkedin.com/in/feifei-duan-607255125"],
+      ["Kai Ru","Shepherd Robotics","China","https://www.linkedin.com/in/pengkai-r-07086633/"],
+      ["Param Mehta","Sigma","United States (Indian heritage)","https://www.linkedin.com/in/param-u-mehta/"],
+      ["Rushil Knagaram","Sigma","United States (Indian heritage)","https://www.linkedin.com/in/rushil-knagaram/"],
+      ["Ahnaf Shahriar","Simantic","Bangladesh","https://www.linkedin.com/in/ahnaf-s/"],
+      ["Seungmin Hong","Simantic","South Korea","https://www.linkedin.com/in/shong0504/"],
+      ["Ryan Ning","Simulithic","Canada","https://www.linkedin.com/in/ryan-ning"],
+      ["Satyam Singh","Simulithic","India","https://www.linkedin.com/in/satyamsingh2003/"],
+      ["Justin Kwon","Sinter","United States (Korean heritage)","https://www.linkedin.com/in/jkwonn/"],
+      ["Oliver Johnson","Sinter","United States","https://www.linkedin.com/in/oliver-johnson-359252281/"],
+      ["Anton Hantel","Sona8","Germany","https://www.linkedin.com/in/anton-hantel/"],
+      ["Madeleine Malmsten","Sona8","Sweden","https://www.linkedin.com/in/mmalmsten"],
+      ["Thilo Tamme","Sona8","Germany","https://www.linkedin.com/in/ttamme/"],
+      ["Benedict Quartey","SuperRadiant","Ghana","https://www.linkedin.com/in/benedictquartey/"],
+      ["Cooper Niu","SuperRadiant","China","https://www.linkedin.com/in/cooper-niu/"],
+      ["Owen Tower","SuperRadiant","United States","https://www.linkedin.com/in/owen-tower-270630133"],
+      ["Amitav Kohli","Talos","United States (Indian heritage)","https://www.linkedin.com/in/amitav-kohli"],
+      ["Himani Musku","Talos","United States (Indian heritage)","https://www.linkedin.com/in/himani-musku/"],
+      ["Kevin Hwang","Talos","United States (Korean heritage)","https://www.linkedin.com/in/kevin-hwang-jh/"],
+      ["Christian Vestergaard","The Agentic Data Co.","Denmark","https://www.linkedin.com/in/chrisvestergaard/"],
+      ["Matias Voldby Drejer","The Agentic Data Co.","Denmark","https://www.linkedin.com/in/matiasdrejer/"],
+      ["Julius Lipp","The Company Company","Germany","https://www.linkedin.com/in/julius-lipp"],
+      ["Aarush Yadav","The Subvocal Company","United States (Indian heritage)","https://www.linkedin.com/in/aarushyadav"],
+      ["Arnav Kumar","The Subvocal Company","United States (Indian heritage)","https://www.linkedin.com/in/arnav-kumar-66419027a/"],
+      ["Abdul Basit Tonmoy","Tilion","Bangladesh","https://www.linkedin.com/in/abdul-basit-tonmoy/"],
+      ["Arman Luthra","Tilion","India","https://www.linkedin.com/in/armanluthra/"],
+      ["Kazi Fardinul Hoque","Tilion","Bangladesh","https://www.linkedin.com/in/kazi-fardinul-hoque"],
+      ["Md Shahrier Islam Arham","Tilion","Bangladesh","https://www.linkedin.com/in/shahrierislamarham"],
+      ["Lucas Irvine","Tire Swing","United States","https://www.linkedin.com/in/lucas-i-b20187128/"],
+      ["Paul Witten","Tire Swing","United States","https://www.linkedin.com/in/paul-witten-39579715a"],
+      ["Aly Moursy","Veeza AI","Egypt","https://www.linkedin.com/in/alymoursy/"],
       ["Edin Citaku","Veltha","Germany","https://www.linkedin.com/in/edin-citaku-564000127"],
       ["Roland Jaloszynski","Veltha","Poland","https://www.linkedin.com/in/roland-jal"],
-      ["Alex Tung","Whitespace","United Kingdom","https://www.linkedin.com/in/alexyctung/"],
-      ["Leon Yao","Whitespace","United Kingdom","https://www.linkedin.com/in/linghong-yao/"],
-      ["Abraham Heifets","WonderTx","Canada","https://www.linkedin.com/in/abrahamheifets/"],
-      ["Axel Andersson Lingbert","Zaplar","Sweden","https://www.linkedin.com/in/axel-andersson-lingbert-0332b2322"],
-      ["Oscar Karlstromer","Zaplar","Sweden","https://www.linkedin.com/in/oscarkarlstromer/"],
-      ["Jon Milles","Zaplar","Sweden","https://www.linkedin.com/in/jon-milles"],
-      ["Douglas Solberg","Zaplar","Sweden","https://www.linkedin.com/in/douglas-solberg/"]
+      ["Daniel McNeil","Vorelios","United States","https://www.linkedin.com/in/daniel-t-mcneil/"],
+      ["Krish Kapadia","Vorelios","United States (Indian heritage)","https://www.linkedin.com/in/krish-r-kapadia/"],
+      ["Caleb Pong","Vyra","United States","https://www.linkedin.com/in/cjpong"],
+      ["Sulan Zhang","Vyra","United States (Chinese heritage)","https://www.linkedin.com/in/sulan-zhang"],
+      ["Chaitanya Choudhary","Workers IO","India","https://www.linkedin.com/in/chaitanyya"]
     ];
     return raw.map(function(r){
       return {
         id:uid(), name:r[0], company:r[1], country:r[2], linkedin:r[3],
         status:'to_connect', notes:'',
-        dateAdded: todayStr(), dateStatusChanged: todayStr()
+        dateAdded: todayStr(), dateStatusChanged: todayStr(), dateSent: null
       };
     });
   }
@@ -868,6 +866,7 @@
       '<div class="mode-switch">'+
         '<button class="mode-btn'+(currentMode==='guests'?' active':'')+'" onclick="PL.switchMode(\'guests\')">Podcast Guests</button>'+
         '<button class="mode-btn'+(currentMode==='connections'?' active':'')+'" onclick="PL.switchMode(\'connections\')">Daily Connections (GTM)</button>'+
+        '<button class="mode-btn'+(currentMode==='monitoring'?' active':'')+'" onclick="PL.switchMode(\'monitoring\')">Candidate Monitoring</button>'+
       '</div>'
     );
   }
@@ -1049,7 +1048,7 @@
       '<div class="topbar">'+
         '<div>'+
           '<div class="eyebrow">'+accountLabel+' · GTM (Paulina)</div>'+
-          '<h1>YC S26 Connections</h1>'+
+          '<h1>YC Fall 26 Connections</h1>'+
           '<div class="sub">International founders — connect only, no messages. Separate from the podcast pipeline. · '+formatLastSaved()+'</div>'+
         '</div>'+
         '<div class="topbar-actions">'+
@@ -1192,9 +1191,77 @@
   }
 
 
+  function monitoringStaleList(){
+    var list = activeStore().list;
+    return list.filter(function(c){
+      return c.status==='sent' && c.dateSent && daysSince(c.dateSent) >= 7;
+    }).sort(function(a,b){ return daysSince(b.dateSent)-daysSince(a.dateSent); });
+  }
+
+  function renderMonitoringCard(c){
+    var days = daysSince(c.dateSent);
+    var linkedinBtn = c.linkedin
+      ? '<button class="mini-btn" onclick="PL.openConnLinkedin(\''+c.id+'\')">🔗 LinkedIn</button>'
+      : '<span class="mini-btn accent-clay">Can\'t find LinkedIn</span>';
+    return (
+      '<div class="monitor-card">'+
+        '<div class="monitor-head">'+
+          '<div>'+
+            '<div class="monitor-name">'+esc(c.name)+'</div>'+
+            '<div class="monitor-meta">'+esc(c.company||'—')+' · '+esc(c.country||'')+'</div>'+
+          '</div>'+
+          linkedinBtn+
+        '</div>'+
+        '<div class="monitor-footer">'+
+          '<span class="monitor-days">Sent '+c.dateSent+' · '+days+'d ago</span>'+
+          '<div class="monitor-actions">'+
+            '<button class="btn btn-primary btn-sm" onclick="PL.setConnStatus(\''+c.id+'\',\'accepted\')">Accepted</button>'+
+            '<button class="btn btn-danger-ghost btn-sm" onclick="PL.setConnStatus(\''+c.id+'\',\'not_accepted\')">Not accepted</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'
+    );
+  }
+
+  function renderMonitoringView(){
+    var accountLabel = connAccount==='avi' ? 'Avi' : 'Daivik';
+    var stale = monitoringStaleList();
+    var cardsHtml = stale.length
+      ? stale.map(renderMonitoringCard).join('')
+      : '<div class="stale-empty" style="padding:20px 0;">Nothing needs review right now for '+accountLabel+' — you\'re on top of it.</div>';
+
+    return (
+      '<div class="topbar">'+
+        '<div>'+
+          '<div class="eyebrow">'+accountLabel+' · GTM (Paulina)</div>'+
+          '<h1>Candidate Monitoring</h1>'+
+          '<div class="sub">People contacted a while ago with no response yet. · '+formatLastSaved()+'</div>'+
+        '</div>'+
+      '</div>'+
+
+      renderConnAccountTabs()+
+
+      '<div class="monitor-instructions">'+
+        '<p>People you sent a connection request to a while ago that still show no movement. Open their LinkedIn, see where things stand, then pick the matching case:</p>'+
+        '<ol>'+
+          '<li><b>Connection request still pending</b> (they never accepted) — click <b>Not accepted</b> to clear them from this list.</li>'+
+          '<li><b>They accepted</b> — click <b>Accepted</b> to move them forward.</li>'+
+        '</ol>'+
+        '<p class="monitor-note">Picking Accepted or Not accepted (rather than leaving it) powers the acceptance-coverage and silent-accept metrics on the LinkedIn dashboard.</p>'+
+      '</div>'+
+
+      '<div class="monitor-count">'+stale.length+' candidate'+(stale.length===1?'':'s')+'</div>'+
+
+      '<div class="monitor-list">'+cardsHtml+'</div>'
+    );
+  }
+
   function render(){
     var app = document.getElementById('app');
-    app.innerHTML = renderModeSwitcher() + (currentMode==='connections' ? renderConnectionsView() : renderGuestsView());
+    var viewHtml = currentMode==='connections' ? renderConnectionsView()
+      : currentMode==='monitoring' ? renderMonitoringView()
+      : renderGuestsView();
+    app.innerHTML = renderModeSwitcher() + viewHtml;
 
     var existingModal = document.getElementById('modal-root');
     if(existingModal) existingModal.remove();
